@@ -1,0 +1,34 @@
+name: Export phone models
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ["tools/export_knnvc_onnx.py", ".github/workflows/export.yml"]
+
+permissions:
+  contents: write
+
+jobs:
+  export:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Export kNN-VC to ONNX
+        run: |
+          set -euo pipefail
+          pip install -q numpy onnx onnxruntime
+          pip install -q torch torchaudio --index-url https://download.pytorch.org/whl/cpu
+          git clone -q --depth 1 https://github.com/bshall/knn-vc knnvc
+          python3 tools/export_knnvc_onnx.py knnvc models 2>&1 | tee export-log.txt
+          ls -la models
+      - name: Publish models as a release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release delete knnvc-models -y --cleanup-tag 2>/dev/null || true
+          gh release create knnvc-models --title "Phone models: kNN-VC (WavLM 6-layer + HiFi-GAN)" \
+            --notes "$(cat export-log.txt | tail -12)" models/wavlm6.int8.onnx models/hifigan.int8.onnx models/hifigan.onnx export-log.txt
