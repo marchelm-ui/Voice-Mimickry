@@ -274,7 +274,7 @@ class Synth(private val ref: KokoroRef, private val aligner: Aligner, private va
     fun speak(bank: VoiceBank, line: String, o: Opts = Opts()): Pair<FloatArray, Report> {
         val refSid = if (bank.f0Median > 165) KokoroRef.FEMALE_A else KokoroRef.MALE_A
         val phrases = TextNorm.phrases(line)
-        val toneSrc = bank.recs.take(3).fold(FloatArray(0)) { a, r -> a + r.audio }.ifEmpty { FloatArray(Dsp.SR) }
+        val toneSrc = bank.recs.take(3).fold(FloatArray(0)) { a, r -> a + r.audio }.let { if (it.isEmpty()) FloatArray(Dsp.SR) else it }
         val pieces = ArrayList<FloatArray>()
         val sources = ArrayList<Pair<String, Source>>()
         var seams = 0
