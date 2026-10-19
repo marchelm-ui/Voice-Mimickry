@@ -23,7 +23,8 @@ jobs:
           pip install -q numpy onnx onnxruntime
           pip install -q torch torchaudio --index-url https://download.pytorch.org/whl/cpu
           git clone -q --depth 1 https://github.com/bshall/knn-vc knnvc
-          python3 tools/export_knnvc_onnx.py knnvc models 2>&1 | tee export-log.txt
+          python3 tools/export_knnvc_onnx.py knnvc models > export-log.txt 2>&1 || { tail -80 export-log.txt; exit 1; }
+          cat export-log.txt
           ls -la models
       - name: Publish models as a release
         env:
@@ -32,3 +33,16 @@ jobs:
           gh release delete knnvc-models -y --cleanup-tag 2>/dev/null || true
           gh release create knnvc-models --title "Phone models: kNN-VC (WavLM 6-layer + HiFi-GAN)" \
             --notes "$(cat export-log.txt | tail -12)" models/wavlm6.int8.onnx models/hifigan.int8.onnx models/hifigan.onnx export-log.txt
+      - name: Save the log if it failed
+        if: failure()
+        run: |
+          cp export-log.txt /tmp/ 2>/dev/null || echo "no log" > /tmp/export-log.txt
+          git config user.name build-bot
+          git config user.email build-bot@users.noreply.github.com
+          git checkout -q --orphan export-logs
+          git rm -rf -q --cached . > /dev/null
+          rm -rf ./* ./.github knnvc models
+          cp /tmp/export-log.txt .
+          git add -f export-log.txt
+          git commit -q -m "Export log ${{ github.run_number }}"
+          git push -q -f origin export-logs
