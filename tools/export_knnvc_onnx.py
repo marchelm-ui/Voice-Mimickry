@@ -67,7 +67,11 @@ quantize_dynamic(f"{out}/hifigan.onnx", f"{out}/hifigan.int8.onnx", weight_type=
 import onnx  # noqa: E402
 from onnxconverter_common import float16  # noqa: E402
 for src, dst in [("wavlm6", "wavlm6.fp16"), ("hifigan", "hifigan.fp16")]:
-    f16 = float16.convert_float_to_float16(onnx.load(f"{out}/{src}.onnx"), keep_io_types=True)
+    # WavLM's feature extractor holds a Cast-to-float node the converter mishandles; leaving Cast
+    # (and the norm ops, for accuracy) in fp32 lets the converter add its own boundary casts
+    f16 = float16.convert_float_to_float16(
+        onnx.load(f"{out}/{src}.onnx"), keep_io_types=True,
+        op_block_list=list(float16.DEFAULT_OP_BLOCK_LIST) + ["Cast"])
     onnx.save(f16, f"{out}/{dst}.onnx")
 
 import onnxruntime as ort  # noqa: E402
