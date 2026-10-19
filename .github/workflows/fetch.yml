@@ -5,10 +5,8 @@ name: Fetch outside audio
 #  - ElevenLabs takes of the benchmark lines (links in eval/external/elevenlabs.txt; they expire)
 #  - real human speech from LibriSpeech dev-clean (public domain audiobooks, CC BY 4.0 corpus):
 #    the 4 speakers with the most audio, with exact transcripts
+# Manual only: a rerun replaces the branch, and the ElevenLabs links have expired.
 on:
-  push:
-    branches: [main]
-    paths: ["eval/external/**", ".github/workflows/fetch.yml"]
   workflow_dispatch:
 
 permissions:
@@ -25,7 +23,7 @@ jobs:
           while IFS='|' read -r id url; do
             [ -n "$id" ] || continue
             curl -fsSL --retry 3 -o "/tmp/out/elevenlabs/$id.mp3" "$url" && echo "got $id" || echo "FAILED $id"
-          done < eval/external/elevenlabs.txt
+          done < <(cat eval/external/elevenlabs.txt 2>/dev/null || true)
           ls -la /tmp/out/elevenlabs | head -40
       - name: Real speech (LibriSpeech dev-clean)
         run: |
