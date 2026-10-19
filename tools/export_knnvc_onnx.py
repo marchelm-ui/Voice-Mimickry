@@ -40,7 +40,11 @@ class Vocoder(torch.nn.Module):
 
 enc = Encoder(m.wavlm).eval()
 voc = Vocoder(m.hifigan).eval()
-x = torch.randn(1, 16000 * 3) * 0.1
+# speech-like test signal: a buzzy 150 Hz tone with slow vowel-like filter changes (random noise is
+# not a fair test for a speech encoder)
+t = torch.arange(16000 * 3) / 16000.0
+x = sum(torch.sin(2 * torch.pi * 150 * h * t) / h for h in range(1, 12)) * (0.5 + 0.5 * torch.sin(2 * torch.pi * 0.7 * t))
+x = (x / x.abs().max() * 0.3)[None]
 with torch.no_grad():
     ref_feats = enc(x)
     ref_wav = voc(ref_feats[None])
@@ -54,7 +58,8 @@ torch.onnx.export(voc, (ref_feats[None],), f"{out}/hifigan.onnx", input_names=["
                   dynamic_axes={"feats": {1: "N"}, "wav": {1: "T"}}, opset_version=17, dynamo=False)
 
 from onnxruntime.quantization import QuantType, quantize_dynamic  # noqa: E402
-quantize_dynamic(f"{out}/wavlm6.onnx", f"{out}/wavlm6.int8.onnx", weight_type=QuantType.QInt8)
+# per-channel weights keep the transformer accurate; the plain variant scored only 0.37 cosine
+quantize_dynamic(f"{out}/wavlm6.onnx", f"{out}/wavlm6.int8.onnx", weight_type=QuantType.QInt8, per_channel=True, reduce_range=True)
 quantize_dynamic(f"{out}/hifigan.onnx", f"{out}/hifigan.int8.onnx", weight_type=QuantType.QInt8)
 
 import onnxruntime as ort  # noqa: E402
