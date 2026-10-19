@@ -287,7 +287,9 @@ class Synth(private val ref: KokoroRef, private val aligner: Aligner, private va
             for (c in path) {
                 if (c.rec < 0) {
                     val w = words[pos].w
-                    val x = if (o.fallback == Fallback.PHONES || o.fallback == Fallback.AUTO) splice(bank, w) else null
+                    // Measured: a neural patch is far more understandable than spliced sounds
+                    // (20-28% vs 64-96% misheard), so AUTO tries the patch first and splices only without it.
+                    val x = if (o.fallback == Fallback.PHONES) splice(bank, w) else null
                     if (x != null) units += Unit(listOf(words[pos]), x, Source.SPLICED, mutableListOf(x.size))
                     else { needNeural += units.size to pos; units += Unit(listOf(words[pos]), FloatArray(0), Source.NEURAL, mutableListOf()) }
                 } else {
@@ -304,7 +306,11 @@ class Synth(private val ref: KokoroRef, private val aligner: Aligner, private va
                 val got = if (o.fallback == Fallback.NEURAL || o.fallback == Fallback.AUTO)
                     try { neural(bank, words.map { it.w }, needNeural.map { it.second }) } catch (e: Throwable) { null } else null
                 for ((ui, p) in needNeural) {
-                    val x = got?.get(p)
+                    var x = got?.get(p)
+                    if ((x == null || x.isEmpty()) && o.fallback == Fallback.AUTO) {
+                        splice(bank, words[p].w)?.let { s -> units[ui] = Unit(units[ui].words, s, Source.SPLICED, mutableListOf(s.size)); x = null }
+                        if (units[ui].source == Source.SPLICED) continue
+                    }
                     val old = units[ui]
                     units[ui] = if (x != null && x.isNotEmpty()) Unit(old.words, x, Source.NEURAL, mutableListOf(x.size))
                     else FloatArray(((if (o.fallback == Fallback.SILENT) 0.06 else 0.25) * Dsp.SR).toInt())
