@@ -27,6 +27,7 @@ import text as textmod
 PAUSE_S = {",": 0.20, ".": 0.38, "!": 0.34, "?": 0.38}
 XFADE = int(0.006 * dsp.SR)
 MARGIN = int(0.004 * dsp.SR)
+CONTEXT_WEIGHT = 0.25
 
 POCKET = os.environ.get("KENKU_POCKET", "/home/claude/dl/sherpa-onnx-pocket-tts-int8-2026-01-26")
 TTS_BIN = os.environ.get("KENKU_TTS_BIN", "/home/claude/dl/sherpa-onnx-v1.13.8-linux-x64-static/bin/sherpa-onnx-offline-tts")
@@ -41,6 +42,8 @@ class Opts:
     room_tone: bool = True
     match_loudness: bool = True
     max_span: int = 8
+    context: float = 0.25          # weight for matching neighbouring words
+    diphone: bool = True           # join spliced sounds mid-phone
 
 
 @dataclass
@@ -107,6 +110,17 @@ def _target_cost(bank, ri, wi, l, words, i, end):
     if i > 0 and first.initial:
         c += 0.1
     c += 2.0 * sum(1 - rec.words[wi + k].conf for k in range(l))   # doubtful recognition
+    # context: a word sounds different depending on its neighbours (coarticulation; "thuh" vs
+    # "thee"). Prefer units whose recorded neighbours match the target's neighbours.
+    if CONTEXT_WEIGHT:
+        tprev = words[i - 1]["w"] if i > 0 else None
+        tnext = words[i + l]["w"] if i + l < len(words) else None
+        sprev = rec.words[wi - 1].text if wi > 0 and not rec.words[wi - 1].final else None
+        snext = rec.words[wi + l].text if wi + l < len(rec.words) and not last.final else None
+        if tprev != sprev:
+            c += CONTEXT_WEIGHT * (0.5 if (tprev and sprev and tprev[0] == sprev[0]) else 1.0)
+        if tnext != snext:
+            c += CONTEXT_WEIGHT * (0.5 if (tnext and snext and tnext[0] == snext[0]) else 1.0)
     return c
 
 
@@ -211,6 +225,50 @@ def splice_word(bank, word):
     return out
 
 
+def splice_word_diphone(bank, word):
+    """Like splice_word, but consecutive pieces overlap by one sound and are joined in the MIDDLE
+    of that shared sound, the steadiest point, as classic diphone synthesizers do. Pieces must
+    cover at least two sounds so each one carries a real transition."""
+    import kokoro_ref
+    target = [p for p in kokoro_ref.phonemes(word) if p not in ("ˈ", "ˌ")]
+    if len(target) < 2:
+        return splice_word(bank, word)
+    idx = _phone_units(bank)
+    segs = []                     # (ri, wi, a, b, ti, tj) covering target[ti:tj]
+    i = 0
+    while i < len(target) - 1 or not segs:
+        got = None
+        for L in range(min(5, len(target) - i), 1, -1):
+            opts = idx.get(tuple(target[i:i + L]))
+            if opts:
+                def score(o):
+                    ri, wi, a, b = o
+                    n = len(bank.recs[ri].words[wi].phones)
+                    s = 0 if (a == 0) == (i == 0) else 1
+                    s += 0 if (b == n) == (i + L == len(target)) else 1
+                    return s + 2 * (1 - bank.recs[ri].words[wi].conf)
+                got = (L, min(opts, key=score))
+                break
+        if got is None:
+            return splice_word(bank, word)
+        L, (ri, wi, a, b) = got
+        segs.append((ri, wi, a, b, i, i + L))
+        if i + L >= len(target):
+            break
+        i = i + L - 1             # overlap one sound
+    out = None
+    for k, (ri, wi, a, b, ti, tj) in enumerate(segs):
+        ph = bank.recs[ri].words[wi].phones
+        audio = bank.recs[ri].audio
+        s = ph[a][1] if k == 0 else (ph[a][1] + ph[a][2]) // 2
+        e = ph[b - 1][2] if k == len(segs) - 1 else (ph[b - 1][1] + ph[b - 1][2]) // 2
+        piece = audio[max(0, s - (MARGIN if k == 0 else 0)):e + (MARGIN if k == len(segs) - 1 else 0)]
+        if len(piece) < 2:
+            return splice_word(bank, word)
+        out = piece if out is None else dsp.crossfade_concat(out, piece, min(int(0.012 * dsp.SR), len(piece) // 3, len(out) // 3))
+    return out
+
+
 def neural_words(bank, phrase_words, need):
     """Neural clone of the voice says the whole phrase; we cut out just the needed words."""
     import aligner
@@ -268,7 +326,9 @@ def _unit_audio(bank, path, words, opts, phrase_words):
         if ri is None:
             w = words[pos]["w"]
             u = Unit([words[pos]], kind="phones")
-            x = splice_word(bank, w) if opts.fallback in ("phones", "auto") else None
+            x = None
+            if opts.fallback in ("phones", "auto"):
+                x = splice_word_diphone(bank, w) if opts.diphone else splice_word(bank, w)
             if x is None:
                 u.kind = "neural"
                 need_neural.append((len(units), pos))
@@ -390,6 +450,8 @@ def _ramp_edge(ratio, semis, tail, n=24):
 def speak(bank, line, opts=None, ref_sid=None):
     """Say `line` in the voice of `bank`. Returns (audio, report)."""
     opts = opts or Opts()
+    global CONTEXT_WEIGHT
+    CONTEXT_WEIGHT = opts.context
     toks = textmod.normalize(line)
     if ref_sid is None:
         ref_sid = 2 if bank.f0_median > 165 else 11

@@ -16,6 +16,7 @@ import synth  # noqa: E402
 import text as textmod  # noqa: E402
 from bank import transcribe  # noqa: E402
 from corpus import TEST  # noqa: E402
+from benchmark import line_texts  # noqa: E402
 
 
 def parse(spec):
@@ -33,7 +34,7 @@ def main():
     specs = [parse(s) for s in sys.argv[4:]] or [("default", synth.Opts())]
     bank = pickle.load(open(f"{data}/{spk}/bank.pkl", "rb"))
     vp = metrics.voice_print([dsp.load(f) for f in sorted(glob.glob(f"{data}/{spk}/train/*.wav"))[:20]])
-    lines = TEST[:n]
+    lines = [line_texts(data, spk)[int(k)] for k in os.environ['LINES'].split(',')] if os.environ.get('LINES') else line_texts(data, spk)[:n]
     for name, o in specs:
         outs = [synth.speak(bank, l, o)[0] for l in lines]
         hyps = transcribe(outs)

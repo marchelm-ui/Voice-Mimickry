@@ -1,0 +1,55 @@
+name: Fetch outside audio
+
+# Downloads reference audio this project's dev box can't reach (open internet only here) and
+# stores it on the external-audio branch:
+#  - ElevenLabs takes of the benchmark lines (links in eval/external/elevenlabs.txt; they expire)
+#  - real human speech from LibriSpeech dev-clean (public domain audiobooks, CC BY 4.0 corpus):
+#    the 4 speakers with the most audio, with exact transcripts
+on:
+  push:
+    branches: [main]
+    paths: ["eval/external/**", ".github/workflows/fetch.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  fetch:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+      - name: ElevenLabs takes
+        run: |
+          mkdir -p /tmp/out/elevenlabs
+          while IFS='|' read -r id url; do
+            [ -n "$id" ] || continue
+            curl -fsSL --retry 3 -o "/tmp/out/elevenlabs/$id.mp3" "$url" && echo "got $id" || echo "FAILED $id"
+          done < eval/external/elevenlabs.txt
+          ls -la /tmp/out/elevenlabs | head -40
+      - name: Real speech (LibriSpeech dev-clean)
+        run: |
+          set -e
+          sudo apt-get install -y -qq flac > /dev/null
+          curl -fsSL --retry 3 https://www.openslr.org/resources/12/dev-clean.tar.gz | tar xz
+          cd LibriSpeech/dev-clean
+          # four speakers with the most audio
+          for spk in $(for s in *; do echo "$(du -s $s | cut -f1) $s"; done | sort -rn | head -4 | cut -d' ' -f2); do
+            mkdir -p /tmp/out/librispeech/$spk
+            cat $spk/*/*.trans.txt > /tmp/out/librispeech/$spk/trans.txt
+            cp $spk/*/*.flac /tmp/out/librispeech/$spk/
+            echo "$spk: $(ls /tmp/out/librispeech/$spk/*.flac | wc -l) files"
+          done
+          cp ../SPEAKERS.TXT /tmp/out/librispeech/ 2>/dev/null || true
+          du -sh /tmp/out/librispeech
+      - name: Store on the external-audio branch
+        run: |
+          git config user.name build-bot
+          git config user.email build-bot@users.noreply.github.com
+          git checkout -q --orphan external-audio
+          git rm -rf -q --cached . > /dev/null
+          rm -rf ./* ./.github
+          cp -r /tmp/out/* .
+          git add -f -A
+          git commit -q -m "Outside audio, run ${{ github.run_number }}"
+          git push -q -f origin external-audio

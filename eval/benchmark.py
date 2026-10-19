@@ -36,6 +36,14 @@ from corpus import TEST  # noqa: E402
 OTHER = {"heart": 9, "michael": 13, "george": 11}
 
 
+def line_texts(data, spk):
+    """Test lines for a voice: the held-out truth recordings' texts if given, else the corpus."""
+    js = sorted(glob.glob(f"{data}/{spk}/truth/*.json"))
+    if js and spk not in OTHER:
+        return [json.load(open(p))["text"] for p in js]
+    return TEST
+
+
 def pocket(bank, line):
     ref = bank.reference_clip()
     P = synth.POCKET
@@ -67,6 +75,8 @@ def run_system(name, spk, bank, line, i, data):
     if name == "pocket":
         return pocket(bank, line), {}
     if name == "other_voice":
+        if spk not in OTHER:
+            return np.zeros(dsp.SR, dtype=np.float32), {}
         return other_voice(spk, line), {}
     raise ValueError(name)
 
@@ -88,7 +98,8 @@ def main():
         trains = [dsp.load(f) for f in sorted(glob.glob(f"{a.data}/{spk}/train/*.wav"))]
         vp = metrics.voice_print(trains)
         outs = {}
-        for i, line in enumerate(TEST[:a.lines]):
+        lines = line_texts(a.data, spk)[:a.lines]
+        for i, line in enumerate(lines):
             truth = dsp.load(f"{a.data}/{spk}/truth/{i:03d}.wav")
             for s in systems:
                 t = time.time()
@@ -103,7 +114,7 @@ def main():
         for k, (txt, _, _, _) in zip(keys, hyps):
             i, s = k
             x, rep, dt, p = outs[k]
-            ref_words = textmod.words_only(TEST[i])
+            ref_words = textmod.words_only(lines[i])
             e, n = metrics.wer_words(ref_words, txt.split())
             sig, bak, ovr = metrics.dnsmos(x)
             truth = dsp.load(f"{a.data}/{spk}/truth/{i:03d}.wav")
