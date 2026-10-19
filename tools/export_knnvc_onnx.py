@@ -62,13 +62,21 @@ from onnxruntime.quantization import QuantType, quantize_dynamic  # noqa: E402
 quantize_dynamic(f"{out}/wavlm6.onnx", f"{out}/wavlm6.int8.onnx", weight_type=QuantType.QInt8, per_channel=True, reduce_range=True)
 quantize_dynamic(f"{out}/hifigan.onnx", f"{out}/hifigan.int8.onnx", weight_type=QuantType.QInt8)
 
+# fp16: half the size, essentially lossless — the phone uses these (int8 cost too much accuracy,
+# 0.86 cosine on the encoder, and the features are the kNN search keys)
+import onnx  # noqa: E402
+from onnxconverter_common import float16  # noqa: E402
+for src, dst in [("wavlm6", "wavlm6.fp16"), ("hifigan", "hifigan.fp16")]:
+    f16 = float16.convert_float_to_float16(onnx.load(f"{out}/{src}.onnx"), keep_io_types=True)
+    onnx.save(f16, f"{out}/{dst}.onnx")
+
 import onnxruntime as ort  # noqa: E402
-for name in ["wavlm6.onnx", "wavlm6.int8.onnx"]:
+for name in ["wavlm6.onnx", "wavlm6.fp16.onnx", "wavlm6.int8.onnx"]:
     s = ort.InferenceSession(f"{out}/{name}")
     y = s.run(None, {"wav": x.numpy()})[0]
     cos = float((y * ref_feats.numpy()).sum() / (np.linalg.norm(y) * np.linalg.norm(ref_feats.numpy())))
     print(name, "matches PyTorch, cosine", round(cos, 4), "size MB", round(os.path.getsize(f"{out}/{name}") / 1e6, 1))
-for name in ["hifigan.onnx", "hifigan.int8.onnx"]:
+for name in ["hifigan.onnx", "hifigan.fp16.onnx", "hifigan.int8.onnx"]:
     s = ort.InferenceSession(f"{out}/{name}")
     y = s.run(None, {"feats": ref_feats[None].numpy()})[0]
     r = ref_wav.numpy()

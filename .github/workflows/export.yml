@@ -20,7 +20,7 @@ jobs:
       - name: Export kNN-VC to ONNX
         run: |
           set -euo pipefail
-          pip install -q numpy onnx onnxruntime
+          pip install -q numpy onnx onnxruntime onnxconverter-common
           pip install -q torch torchaudio --index-url https://download.pytorch.org/whl/cpu
           git clone -q --depth 1 https://github.com/bshall/knn-vc knnvc
           python3 tools/export_knnvc_onnx.py knnvc models > export-log.txt 2>&1 || { tail -80 export-log.txt; exit 1; }
@@ -32,7 +32,8 @@ jobs:
         run: |
           gh release delete knnvc-models -y --cleanup-tag 2>/dev/null || true
           gh release create knnvc-models --title "Phone models: kNN-VC (WavLM 6-layer + HiFi-GAN)" \
-            --notes "$(cat export-log.txt | tail -12)" models/wavlm6.int8.onnx models/hifigan.int8.onnx models/hifigan.onnx export-log.txt
+            --notes "$(cat export-log.txt | tail -12)" models/wavlm6.fp16.onnx models/hifigan.fp16.onnx \
+            models/wavlm6.int8.onnx models/hifigan.int8.onnx models/hifigan.onnx export-log.txt
       - name: Save the log if it failed
         if: failure()
         run: |

@@ -25,8 +25,8 @@ class FrameMimic(dir: File) {
     private val opts = OrtSession.SessionOptions().apply {
         setIntraOpNumThreads(Runtime.getRuntime().availableProcessors().let { if (it >= 8) 4 else 2 })
     }
-    private val encoder = env.createSession(File(dir, "wavlm6.int8.onnx").absolutePath, opts)
-    private val vocoder = env.createSession(File(dir, "hifigan.int8.onnx").absolutePath, opts)
+    private val encoder = env.createSession(File(dir, "wavlm6.fp16.onnx").absolutePath, opts)
+    private val vocoder = env.createSession(File(dir, "hifigan.fp16.onnx").absolutePath, opts)
     private val workers = Executors.newFixedThreadPool(4)
 
     companion object { const val DIM = 1024; const val TOPK = 4 }

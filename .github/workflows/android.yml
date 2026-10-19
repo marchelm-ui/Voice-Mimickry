@@ -31,18 +31,22 @@ jobs:
         uses: actions/cache@v4
         with:
           path: android/dl
-          key: mimic-ort-1.28.2-sherpa-1.13.8-kokoro-int8-v1_0-zipformer-en-2023-06-26-pocket-int8-2026-01-26
+          key: mimic-knnvc-fp16-ort-1.28.2-sherpa-1.13.8-kokoro-int8-v1_0-zipformer-en-2023-06-26-pocket-int8-2026-01-26
 
       - name: Get the speech engine and models
         run: |
           set -euo pipefail
-          mkdir -p dl app/libs app/src/main/assets/{kokoro,asr,pocket}
+          mkdir -p dl app/libs app/src/main/assets/{kokoro,asr,pocket,knnvc}
           B=https://github.com/k2-fsa/sherpa-onnx/releases/download
           [ -s dl/sherpa-onnx.aar ] || curl -fL --retry 3 -o dl/sherpa-onnx.aar $B/v1.13.8/sherpa-onnx-1.13.8.aar
           [ -s dl/kokoro.tar.bz2 ] || curl -fL --retry 3 -o dl/kokoro.tar.bz2 $B/tts-models/kokoro-int8-multi-lang-v1_0.tar.bz2
           [ -s dl/asr.tar.bz2 ] || curl -fL --retry 3 -o dl/asr.tar.bz2 $B/asr-models/sherpa-onnx-zipformer-en-2023-06-26.tar.bz2
           [ -s dl/pocket.tar.bz2 ] || curl -fL --retry 3 -o dl/pocket.tar.bz2 $B/tts-models/sherpa-onnx-pocket-tts-int8-2026-01-26.tar.bz2
           [ -s dl/ort.aar ] || curl -fL --retry 3 -o dl/ort.aar https://github.com/csukuangfj/onnxruntime-libs/releases/download/v1.28.2/onnxruntime-android-1.28.2.zip
+          M=https://github.com/${{ github.repository }}/releases/download/knnvc-models
+          [ -s dl/wavlm6.fp16.onnx ] || curl -fL --retry 3 -o dl/wavlm6.fp16.onnx $M/wavlm6.fp16.onnx
+          [ -s dl/hifigan.fp16.onnx ] || curl -fL --retry 3 -o dl/hifigan.fp16.onnx $M/hifigan.fp16.onnx
+          cp dl/wavlm6.fp16.onnx dl/hifigan.fp16.onnx app/src/main/assets/knnvc/
           cp dl/sherpa-onnx.aar app/libs/sherpa-onnx.aar
           cp dl/ort.aar app/libs/onnxruntime-android.aar
           tar xjf dl/kokoro.tar.bz2; tar xjf dl/asr.tar.bz2; tar xjf dl/pocket.tar.bz2
@@ -77,6 +81,7 @@ jobs:
           unzip -l VoiceMimickry.apk | grep -q 'lib/arm64-v8a/libonnxruntime4j_jni.so'
           unzip -l VoiceMimickry.apk | grep -q 'lib/arm64-v8a/libsherpa-onnx-jni.so'
           unzip -l VoiceMimickry.apk | grep -q 'assets/kokoro/model.int8.onnx'
+          unzip -l VoiceMimickry.apk | grep -q 'assets/knnvc/wavlm6.fp16.onnx'
           ZA=$(ls -d $ANDROID_HOME/build-tools/*/ | sort -V | tail -1)zipalign
           $ZA -c -P 16 4 VoiceMimickry.apk && echo "16 KB page alignment OK"
 

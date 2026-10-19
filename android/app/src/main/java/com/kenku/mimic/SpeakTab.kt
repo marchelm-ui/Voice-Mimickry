@@ -23,6 +23,8 @@ class SpeakTab(private val a: MainActivity) {
     private val ui = a.ui
     private var voice: VoiceBank? = null
     private var mode = Synth.Fallback.AUTO
+    private var how = "mimic"      // "mimic": frame-level mimicry; "stitch": word stitching
+    private val howRow = ui.row()
     private val voiceRow = ui.row()
     private val modeRow = ui.row()
     private val input = EditText(a).apply {
@@ -48,7 +50,9 @@ class SpeakTab(private val a: MainActivity) {
             addView(HorizontalScrollView(a).apply { addView(voiceRow); isHorizontalScrollBarEnabled = false }, ui.fill(10))
             addView(input, ui.fill(8))
             addView(ui.button("🦜  Say it", Ui.Kind.PRIMARY) { say() }, ui.fill(10))
-            addView(ui.body("For words they never said:"), ui.fill(4))
+            addView(ui.body("How to mimic:"), ui.fill(4))
+            addView(HorizontalScrollView(a).apply { addView(howRow); isHorizontalScrollBarEnabled = false }, ui.fill(8))
+            addView(ui.body("When stitching, for words they never said:"), ui.fill(4))
             addView(HorizontalScrollView(a).apply { addView(modeRow); isHorizontalScrollBarEnabled = false }, ui.fill(12))
             addView(result, ui.fill(4))
             addView(legend, ui.fill(16))
@@ -63,6 +67,9 @@ class SpeakTab(private val a: MainActivity) {
         if (voice !in vs) voice = vs.firstOrNull()
         if (vs.isEmpty()) voiceRow.addView(ui.body(if (a.engine.ready) "Add a voice in the Voices tab first." else "Loading…"))
         for (v in vs) voiceRow.addView(chip("🦜 ${v.name}", v === voice) { voice = v; refresh() }, ui.wrap())
+        howRow.removeAllViews()
+        listOf("mimic" to "Every sound (smooth)", "stitch" to "Their exact words")
+            .forEach { (h, label) -> howRow.addView(chip(label, h == how) { how = h; refresh() }, ui.wrap()) }
         modeRow.removeAllViews()
         listOf(Synth.Fallback.AUTO to "Fill gaps", Synth.Fallback.PHONES to "Their sounds only", Synth.Fallback.SILENT to "Skip them")
             .forEach { (m, label) -> modeRow.addView(chip(label, m == mode) { mode = m; refresh() }, ui.wrap()) }
@@ -78,7 +85,13 @@ class SpeakTab(private val a: MainActivity) {
         ui.tick(input)
         a.setStatus("Mimicking ${v.name}…")
         val opts = Synth.Opts(fallback = mode)
-        a.work({ a.engine.synth.speak(v, text, opts) }) { r ->
+        a.work({
+            if (how == "mimic") {
+                val x = a.engine.sayMimic(v, text)
+                if (x != null && x.isNotEmpty()) x to Synth.Report(com.kenku.mimic.engine.TextNorm.words(text).map { it to Synth.Source.NEURAL }, 0)
+                else a.engine.synth.speak(v, text, opts)
+            } else a.engine.synth.speak(v, text, opts)
+        }) { r ->
             a.setStatus(null)
             r.onSuccess { (audio, rep) ->
                 val shown = describe(rep)
@@ -112,6 +125,7 @@ class SpeakTab(private val a: MainActivity) {
     private fun summary(rep: Synth.Report): String {
         val n = rep.words.size.coerceAtLeast(1)
         val real = rep.words.count { it.second == Synth.Source.REAL }
+        if (how == "mimic") return "Every 20 ms of sound comes from their recordings; the flow comes from a natural reading."
         return "${real * 100 / n}% their real words · black = real, gold = built from their sounds, blue = AI patch, red = skipped"
     }
 
