@@ -74,6 +74,17 @@ def run_system(name, spk, bank, line, i, data):
         return synth.speak(bank, line, o)
     if name == "pocket":
         return pocket(bank, line), {}
+    if name in ("knnvc", "knnvc_clone"):
+        import knnvc_sys
+        trains = sorted(glob.glob(f"{data}/{spk}/train/*.wav"))
+        if name == "knnvc":
+            sid = 2 if bank.f0_median > 165 else 11     # stock reader matched to the voice's pitch range
+            sys.path.insert(0, os.path.dirname(__file__))
+            from make_proxy_data import say
+            src = say(line, sid)[0]
+        else:
+            src = pocket(bank, line)
+        return knnvc_sys.convert(src, spk, trains), {}
     if name == "elevenlabs":
         # ElevenLabs v4 stock narrator, fetched by CI into the external-audio branch
         ext = os.environ.get("KENKU_EXTERNAL", "/home/claude/external")

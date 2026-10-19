@@ -10,7 +10,7 @@ on:
         default: "15"
       systems:
         description: "Systems to compare"
-        default: "truth,kenku,kenku_naive,pocket,other_voice,elevenlabs"
+        default: "truth,kenku,knnvc,knnvc_clone,pocket,elevenlabs"
       variants:
         description: "Optional ablation variants, e.g. 'a=prosody:0 b=timing:0'"
         default: ""
@@ -29,6 +29,7 @@ env:
   KENKU_POCKET: ${{ github.workspace }}/m/sherpa-onnx-pocket-tts-int8-2026-01-26
   KENKU_SPK: ${{ github.workspace }}/m/wespeaker_en_voxceleb_resnet34.onnx
   KENKU_EXTERNAL: ${{ github.workspace }}/ext
+  KENKU_KNNVC: ${{ github.workspace }}/m/knnvc
   KENKU_DNSMOS: ${{ github.workspace }}/m/dns/DNSMOS/DNSMOS/sig_bak_ovr.onnx
 
 jobs:
@@ -47,11 +48,13 @@ jobs:
         uses: actions/cache@v4
         with:
           path: m
-          key: eval-models-v1
+          key: eval-models-v2
       - name: Get models and tools
         run: |
           set -euo pipefail
           pip install -q numpy scipy onnxruntime
+          pip install -q torch torchaudio --index-url https://download.pytorch.org/whl/cpu
+          [ -d knnvc ] || git clone -q --depth 1 https://github.com/bshall/knn-vc knnvc
           mkdir -p m && cd m
           B=https://github.com/k2-fsa/sherpa-onnx/releases/download
           for u in v1.13.8/sherpa-onnx-v1.13.8-linux-x64-static.tar.bz2 asr-models/sherpa-onnx-zipformer-en-2023-06-26.tar.bz2 \
@@ -85,7 +88,7 @@ jobs:
           set -o pipefail
           mkdir -p out
           python3 eval/benchmark.py data out ${{ matrix.speaker }} --lines ${{ inputs.lines || '15' }} \
-            --systems ${{ inputs.systems || 'truth,kenku,kenku_naive,pocket,other_voice,elevenlabs' }} 2>&1 | tee out/log.txt
+            --systems ${{ inputs.systems || 'truth,kenku,knnvc,knnvc_clone,pocket,elevenlabs' }} 2>&1 | tee out/log.txt
           if [ -n "${{ inputs.variants }}" ]; then
             python3 eval/ablate.py data ${{ matrix.speaker }} ${{ inputs.lines || '15' }} ${{ inputs.variants }} | tee out/ablate.txt
           fi
