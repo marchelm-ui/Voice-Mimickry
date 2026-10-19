@@ -48,9 +48,8 @@ class Aligner(private val ref: KokoroRef) {
     fun dtw(a: Array<DoubleArray>, b: Array<DoubleArray>, band: Double = 0.25): Pair<List<IntArray>, Double> {
         val n = a.size; val m = b.size
         val w = max((band * max(n, m)).toInt(), abs(n - m) + 10)
-        val inf = Double.POSITIVE_INFINITY
-        val D = Array(n + 1) { DoubleArray(m + 1) { inf } }
-        D[0][0] = 0.0
+        val D = Array(n + 1) { FloatArray(m + 1) { Float.POSITIVE_INFINITY } }   // float rows: half the memory
+        D[0][0] = 0f
         for (i in 1..n) {
             val c = i.toDouble() * m / n
             val lo = max(1, (c - w).toInt()); val hi = min(m, (c + w).toInt())
@@ -58,7 +57,7 @@ class Aligner(private val ref: KokoroRef) {
                 var s = 0.0
                 val ai = a[i - 1]; val bj = b[j - 1]
                 for (k in ai.indices) { val df = ai[k] - bj[k]; s += df * df }
-                D[i][j] = sqrt(s) + minOf(D[i - 1][j - 1], D[i - 1][j] + 0.3, D[i][j - 1] + 0.3)
+                D[i][j] = (sqrt(s) + minOf(D[i - 1][j - 1], D[i - 1][j] + 0.3f, D[i][j - 1] + 0.3f)).toFloat()
             }
         }
         var i = n; var j = m
@@ -71,7 +70,7 @@ class Aligner(private val ref: KokoroRef) {
             path += intArrayOf(i - 1, j - 1)
         }
         path.reverse()
-        return path to D[n][m] / (n + m)
+        return path to D[n][m].toDouble() / (n + m)
     }
 
     private fun alignOne(audio: FloatArray, words: List<String>, sid: Int, end: String): Result {
@@ -87,9 +86,11 @@ class Aligner(private val ref: KokoroRef) {
             val even = words.indices.map { k -> intArrayOf(s0 + k * rec.size / words.size, s0 + (k + 1) * rec.size / words.size) }
             return Result(even, List(words.size) { emptyList() }, Double.MAX_VALUE)
         }
-        val (path, cost) = dtw(fa, fb)
+        // Warp at 10 ms resolution (every 2nd frame): same measured accuracy, a quarter of the memory.
+        val S = 2
+        val (path, cost) = dtw(fa.filterIndexed { i, _ -> i % S == 0 }.toTypedArray(), fb.filterIndexed { i, _ -> i % S == 0 }.toTypedArray())
         val map = HashMap<Int, MutableList<Int>>()
-        for (p in path) map.getOrPut(p[0]) { ArrayList() }.add(p[1])
+        for (p in path) for (di in 0 until S) map.getOrPut(p[0] * S + di) { ArrayList() }.apply { for (dj in 0 until S) add(p[1] * S + dj) }
         fun js(sample: Int): List<Int> {
             val f = ((sample - tr[0]) / Dsp.HOP).coerceIn(0, fa.size - 1)
             return map[f] ?: listOf(f)

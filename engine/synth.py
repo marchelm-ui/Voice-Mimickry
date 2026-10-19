@@ -44,6 +44,8 @@ class Opts:
     max_span: int = 8
     context: float = 0.0           # neighbour matching: no measurable gain in A/B, off
     diphone: bool = True           # join spliced sounds mid-phone
+    guide: str = "reader"          # prosody guide: "reader" (stock reference voice) or "clone" (neural clone of this voice)
+    hybrid: float = 1.5            # >0: swap isolated real words whose seams cost more than this for the clone's take
 
 
 @dataclass
@@ -269,6 +271,44 @@ def splice_word_diphone(bank, word):
     return out
 
 
+def clone_reading(bank, phrase_words, end="."):
+    """The neural clone reads the whole phrase in this voice -> (audio, word spans)."""
+    import aligner
+    ref = bank.reference_clip()
+    with tempfile.TemporaryDirectory() as td:
+        rp, op = os.path.join(td, "ref.wav"), os.path.join(td, "out.wav")
+        dsp.save(rp, ref)
+        text = " ".join(w.lower() for w in phrase_words) + (end if end in ".!?" else ".")
+        subprocess.run([TTS_BIN, f"--pocket-lm-flow={POCKET}/lm_flow.int8.onnx",
+                        f"--pocket-lm-main={POCKET}/lm_main.int8.onnx", f"--pocket-encoder={POCKET}/encoder.onnx",
+                        f"--pocket-decoder={POCKET}/decoder.int8.onnx",
+                        f"--pocket-text-conditioner={POCKET}/text_conditioner.onnx",
+                        f"--pocket-vocab-json={POCKET}/vocab.json", f"--pocket-token-scores-json={POCKET}/token_scores.json",
+                        f"--reference-audio={rp}", "--num-threads=2", f"--output-filename={op}", text],
+                       check=True, capture_output=True)
+        x = dsp.load(op)
+    spans, _ = aligner.align(x, phrase_words)
+    return x, spans
+
+
+def prosody_from(x, spans):
+    """Per-word (duration, mean, start, end semitones) of a reading, relative to its median pitch."""
+    f0, _ = dsp.f0_yin(x)
+    v = f0[f0 > 0]
+    med = np.median(v) if len(v) else 150.0
+    out = []
+    for s, e in spans:
+        seg = f0[s // dsp.HOP:max(s // dsp.HOP + 1, e // dsp.HOP)]
+        vv = seg[seg > 0]
+        if len(vv) == 0:
+            out.append((e - s, None, None, None))
+            continue
+        st = _semitones(vv, med)
+        k = max(1, len(st) // 3)
+        out.append((e - s, float(np.mean(st)), float(np.mean(st[:k])), float(np.mean(st[-k:]))))
+    return out
+
+
 def neural_words(bank, phrase_words, need):
     """Neural clone of the voice says the whole phrase; we cut out just the needed words."""
     import aligner
@@ -460,6 +500,30 @@ def _ramp_edge(ratio, semis, tail, n=24):
         ratio[:n] *= ramp[::-1]
 
 
+def _hybridize(bank, path, units, clone, limit, report):
+    """Swap single real words with costly seams on both sides for the clone's take of that word."""
+    x, spans = clone
+    pos = 0
+    for k, (c, u) in enumerate(zip(path, units)):
+        l, ri, wi = c
+        if u.kind == "real" and l == 1:
+            cost = 0.0
+            for nb in (k - 1, k + 1):
+                if 0 <= nb < len(path) and path[nb][1] is not None:
+                    a, b = (path[nb], c) if nb < k else (c, path[nb])
+                    cost += _join_cost(bank, a, b)
+                else:
+                    cost += 0.4
+            if cost > limit:
+                s, e = spans[pos]
+                u.audio = x[s:e].copy()
+                u.word_lens = [len(u.audio)]
+                u.kind = "neural"
+                report["real_words"] -= 1
+                report["neural_words"] += 1
+        pos += l
+
+
 def speak(bank, line, opts=None, ref_sid=None):
     """Say `line` in the voice of `bank`. Returns (audio, report)."""
     opts = opts or Opts()
@@ -482,7 +546,16 @@ def speak(bank, line, opts=None, ref_sid=None):
         for u in units:
             report["words"] += len(u.words)
             report[f"{u.kind}_words"] += len(u.words)
-        ref = reference_prosody([w["w"] for w in words], end, ref_sid)
+        pw = [w["w"] for w in words]
+        clone = None
+        if opts.guide == "clone" or opts.hybrid > 0:
+            try:
+                clone = clone_reading(bank, pw, end)
+            except Exception:
+                clone = None
+        if clone is not None and opts.hybrid > 0:
+            _hybridize(bank, path, units, clone, opts.hybrid, report)
+        ref = prosody_from(*clone) if (clone is not None and opts.guide == "clone") else reference_prosody(pw, end, ref_sid)
         audios = _apply_prosody(bank, units, ref, opts, end) if opts.prosody > 0 or opts.timing > 0 else [u.audio for u in units]
         # loudness: match to the voice's typical level with a slight fall across the line
         phrase = None

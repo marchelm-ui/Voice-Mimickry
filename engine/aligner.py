@@ -19,6 +19,7 @@ KOKORO = os.environ.get("KENKU_KOKORO", "/home/claude/dl/kokoro-multi-lang-v1_0"
 REF_SID = 16   # stock reference voice
 PREROLL = 0   # tried 12 ms pre-roll for soft onsets: WER 22-24% -> 26%, so off
 SNAP_RADIUS = 0   # measured: snapping to energy dips moves cuts AWAY from true boundaries
+WARP_STEP = 2
 FEMALE_REFS = (2, 9)
 MALE_REFS = (11, 13)
 
@@ -153,10 +154,14 @@ def _align_one(audio, words, sid, end):
         ref, wspans, pspans = kokoro_ref.read(words, sid=sid, speed=speed, end=end)
         r0, r1 = _trim(ref)
     fa, fb = features(ref[r0:r1]), features(rec)
-    path, cost = dtw(fa, fb)
+    # Warp at 10 ms resolution (every 2nd frame): same accuracy, a quarter of the memory and time,
+    # which matters on a phone (a 15 s recording would otherwise need a ~70 MB table).
+    S = WARP_STEP
+    path, cost = dtw(fa[::S], fb[::S])
     mp = {}
     for i, j in path:
-        mp.setdefault(i, []).append(j)
+        for di in range(S):
+            mp.setdefault(i * S + di, []).extend(range(j * S, j * S + S))
 
     def frame(sample):
         return int(np.clip((sample - r0) // dsp.HOP, 0, len(fa) - 1))
