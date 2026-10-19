@@ -41,11 +41,13 @@ class Vocoder(torch.nn.Module):
 enc = Encoder(m.wavlm).eval()
 voc = Vocoder(m.hifigan).eval()
 x = torch.randn(1, 16000 * 3) * 0.1
-with torch.inference_mode():
+with torch.no_grad():
     ref_feats = enc(x)
     ref_wav = voc(ref_feats[None])
 print("features", tuple(ref_feats.shape), "wav", tuple(ref_wav.shape))
 
+torch.set_grad_enabled(False)
+ref_feats = ref_feats.clone()
 torch.onnx.export(enc, (x,), f"{out}/wavlm6.onnx", input_names=["wav"], output_names=["feats"],
                   dynamic_axes={"wav": {1: "T"}, "feats": {0: "N"}}, opset_version=17, dynamo=False)
 torch.onnx.export(voc, (ref_feats[None],), f"{out}/hifigan.onnx", input_names=["feats"], output_names=["wav"],
