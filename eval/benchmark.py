@@ -115,7 +115,7 @@ def main():
             rows.append(row)
         print(f"{spk} done", flush=True)
     with open(f"{a.out}/results{a.tag}.json", "w") as f:
-        json.dump(rows, f, indent=1)
+        json.dump(rows, f, indent=1, default=float)
     summarize(rows)
 
 

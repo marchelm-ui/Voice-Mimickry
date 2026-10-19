@@ -57,29 +57,46 @@ jobs:
           unzip -l app/libs/sherpa-onnx.aar | grep -E '\.so$' || true
 
       - name: Engine unit tests
-        run: gradle :app:testReleaseUnitTest --no-daemon 2>&1 | tee test-log.txt
+        run: |
+          set -o pipefail
+          gradle :app:testReleaseUnitTest --no-daemon 2>&1 | tee test-log.txt
 
       - name: Build the APK
-        run: gradle :app:assembleRelease --no-daemon 2>&1 | tee build-log.txt
+        run: |
+          set -o pipefail
+          gradle :app:assembleRelease --no-daemon 2>&1 | tee build-log.txt
 
       - name: Check the APK
         run: |
           set -euo pipefail
           cp app/build/outputs/apk/release/app-release.apk VoiceMimickry.apk
           ls -la VoiceMimickry.apk
-          unzip -l VoiceMimickry.apk | grep -E 'libonnxruntime|libsherpa|onnxruntime4j|assets/(kokoro|asr|pocket)/'
+          unzip -l VoiceMimickry.apk | grep -E 'libonnxruntime|libsherpa|onnxruntime4j|assets/(kokoro|asr|pocket)/' || true
+          unzip -l VoiceMimickry.apk | grep -q 'lib/arm64-v8a/libonnxruntime4j_jni.so'
+          unzip -l VoiceMimickry.apk | grep -q 'lib/arm64-v8a/libsherpa-onnx-jni.so'
+          unzip -l VoiceMimickry.apk | grep -q 'assets/kokoro/model.int8.onnx'
           ZA=$(ls -d $ANDROID_HOME/build-tools/*/ | sort -V | tail -1)zipalign
           $ZA -c -P 16 4 VoiceMimickry.apk && echo "16 KB page alignment OK"
 
-      - name: Keep the test report if tests failed
+      - name: Save logs to the build-logs branch if anything failed
         if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: reports
-          path: |
-            android/app/build/reports
-            android/test-log.txt
-            android/build-log.txt
+        run: |
+          cd ..
+          mkdir -p /tmp/logs
+          cp android/test-log.txt android/build-log.txt /tmp/logs/ 2>/dev/null || true
+          find android/app/build/test-results -name '*.xml' -exec cp {} /tmp/logs/ \; 2>/dev/null || true
+          (cd android && unzip -l VoiceMimickry.apk 2>&1 | tail -40) > /tmp/logs/apk-contents.txt || true
+          ls -la android/app/build/outputs/apk/release/ > /tmp/logs/outputs.txt 2>&1 || true
+          git config user.name build-bot
+          git config user.email build-bot@users.noreply.github.com
+          git checkout --orphan build-logs
+          git rm -rf -q --cached . > /dev/null
+          rm -rf ./*
+          cp /tmp/logs/* . 2>/dev/null || true
+          echo "run ${{ github.run_number }}" > RUN.txt
+          git add -f *.txt *.xml 2>/dev/null || git add -f *.txt
+          git commit -q -m "Build ${{ github.run_number }} logs"
+          git push -q -f origin build-logs
 
       - name: Publish as the latest release
         uses: softprops/action-gh-release@v2

@@ -157,9 +157,13 @@ def _align_one(audio, words, sid, end):
     for i, j in path:
         mp.setdefault(i, []).append(j)
 
-    def to_rec(sample):
-        f = int(np.clip((sample - r0) // dsp.HOP, 0, len(fa) - 1))
-        return int(np.median(mp.get(f, [f]))) * dsp.HOP
+    def frame(sample):
+        return int(np.clip((sample - r0) // dsp.HOP, 0, len(fa) - 1))
+
+    def to_rec(sample, how="median"):
+        js = mp.get(frame(sample), [frame(sample)])
+        j = {"median": np.median(js), "first": min(js), "last": max(js)}[how]
+        return int(j) * dsp.HOP
 
     db = dsp.rms_db(rec, win=240)
 
@@ -171,16 +175,22 @@ def _align_one(audio, words, sid, end):
             return x
         return (lo + int(np.argmin(db[lo:hi + 1]))) * dsp.HOP
 
+    # A word starts at the LAST recording frame its first reference frame maps to, and ends at
+    # the FIRST frame its last reference frame maps to: where the speaker paused but the
+    # reference didn't, the warp path runs flat across the pause, and these choices keep the
+    # pause outside both words instead of splitting it (measured: neighbouring-word fragments
+    # leaking into cuts was the main cause of garbled output).
     words_out, phones_out = [], []
     for k in range(len(words)):
         ws, we = wspans[k]
-        a = 0 if k == 0 else snap(to_rec(ws))
-        b = len(rec) if k == len(words) - 1 else snap(to_rec(wspans[k + 1][0]))
-        words_out.append((s0 + a, s0 + max(a + dsp.HOP, b)))
-        phones_out.append([(ph, s0 + to_rec(ps), s0 + to_rec(pe)) for ph, ps, pe in pspans[k]])
-    # keep word edges monotonic
+        a = 0 if k == 0 else to_rec(ws, "last")
+        b = len(rec) if k == len(words) - 1 else to_rec(max(ws, we - 1), "first") + dsp.HOP
+        words_out.append([s0 + a, s0 + max(a + dsp.HOP, b)])
+        phones_out.append([(ph, s0 + to_rec(ps, "last"), s0 + to_rec(max(ps, pe - 1), "first") + dsp.HOP) for ph, ps, pe in pspans[k]])
     for k in range(1, len(words_out)):
         if words_out[k][0] < words_out[k - 1][0] + dsp.HOP:
-            words_out[k] = (words_out[k - 1][0] + dsp.HOP, max(words_out[k][1], words_out[k - 1][0] + 2 * dsp.HOP))
-        words_out[k - 1] = (words_out[k - 1][0], words_out[k][0])
+            words_out[k][0] = words_out[k - 1][0] + dsp.HOP
+        if words_out[k - 1][1] > words_out[k][0]:
+            words_out[k - 1][1] = words_out[k][0]
+    words_out = [tuple(w) for w in words_out]
     return words_out, phones_out, cost
