@@ -1,0 +1,176 @@
+/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/torch/nn/utils/weight_norm.py:145: FutureWarning: `torch.nn.utils.weight_norm` is deprecated in favor of `torch.nn.utils.parametrizations.weight_norm`.
+  WeightNorm.apply(module, name, dim)
+/home/runner/work/Voice-Mimickry/Voice-Mimickry/tools/export_knnvc_onnx.py:55: DeprecationWarning: You are using the legacy TorchScript-based ONNX export. Starting in PyTorch 2.9, the new torch.export-based ONNX exporter has become the default. Learn more about the new export logic: https://docs.pytorch.org/docs/stable/onnx_export.html. For exporting control flow: https://pytorch.org/tutorials/beginner/onnx/export_control_flow_model_to_onnx_tutorial.html
+  torch.onnx.export(enc, (x,), f"{out}/wavlm6.onnx", input_names=["wav"], output_names=["feats"],
+/home/runner/work/Voice-Mimickry/Voice-Mimickry/knnvc/wavlm/modules.py:495: TracerWarning: Converting a tensor to a Python boolean might cause the trace to be incorrect. We can't record the data flow of Python values, so this value will be treated as a constant in the future. This means that the trace might not generalize to other inputs!
+  assert embed_dim == self.embed_dim
+/home/runner/work/Voice-Mimickry/Voice-Mimickry/knnvc/wavlm/modules.py:496: TracerWarning: Converting a tensor to a Python boolean might cause the trace to be incorrect. We can't record the data flow of Python values, so this value will be treated as a constant in the future. This means that the trace might not generalize to other inputs!
+  assert list(query.size()) == [tgt_len, bsz, embed_dim]
+/home/runner/work/Voice-Mimickry/Voice-Mimickry/knnvc/wavlm/modules.py:500: TracerWarning: Converting a tensor to a Python boolean might cause the trace to be incorrect. We can't record the data flow of Python values, so this value will be treated as a constant in the future. This means that the trace might not generalize to other inputs!
+  assert key_bsz == bsz
+/home/runner/work/Voice-Mimickry/Voice-Mimickry/knnvc/wavlm/modules.py:502: TracerWarning: Converting a tensor to a Python boolean might cause the trace to be incorrect. We can't record the data flow of Python values, so this value will be treated as a constant in the future. This means that the trace might not generalize to other inputs!
+  assert src_len, bsz == value.shape[:2]
+/home/runner/work/Voice-Mimickry/Voice-Mimickry/tools/export_knnvc_onnx.py:57: DeprecationWarning: You are using the legacy TorchScript-based ONNX export. Starting in PyTorch 2.9, the new torch.export-based ONNX exporter has become the default. Learn more about the new export logic: https://docs.pytorch.org/docs/stable/onnx_export.html. For exporting control flow: https://pytorch.org/tutorials/beginner/onnx/export_control_flow_model_to_onnx_tutorial.html
+  torch.onnx.export(voc, (ref_feats[None],), f"{out}/hifigan.onnx", input_names=["feats"], output_names=["wav"],
+[0;93m2026-10-19 23:40:55.552161074 [W:onnxruntime:Default, device_discovery.cc:95 GetPciBusId] Skipping pci_bus_id for PCI path at "/sys/devices/LNXSYSTM:00/LNXSYBUS:00/ACPI0004:00/MSFT1000:00/5620e0c7-8062-4dce-aeb7-520c7ef76171" because filename "5620e0c7-8062-4dce-aeb7-520c7ef76171" did not match expected pattern of [0-9a-f]+:[0-9a-f]+:[0-9a-f]+[.][0-9a-f]+[m
+WARNING:root:Please consider to run pre-processing before quantization. Refer to example: https://github.com/microsoft/onnxruntime-inference-examples/blob/main/quantization/image_classification/cpu/ReadMe.md 
+WARNING:root:Please consider to run pre-processing before quantization. Refer to example: https://github.com/microsoft/onnxruntime-inference-examples/blob/main/quantization/image_classification/cpu/ReadMe.md 
+/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/onnxconverter_common/float16.py:70: UserWarning: the float32 number -5.960464477539063e-08 will be truncated to -1e-07
+  warnings.warn(
+/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/onnxconverter_common/float16.py:52: UserWarning: the float32 number 5.960464477539063e-08 will be truncated to 1e-07
+  warnings.warn(
+/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/onnxconverter_common/float16.py:52: UserWarning: the float32 number 4.478531694801502e-12 will be truncated to 1e-07
+  warnings.warn(
+/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/onnxconverter_common/float16.py:70: UserWarning: the float32 number -1.4066533528256375e-11 will be truncated to -1e-07
+  warnings.warn(
+/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/onnxconverter_common/float16.py:52: UserWarning: the float32 number 7.1894348252499185e-09 will be truncated to 1e-07
+  warnings.warn(
+/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/onnxconverter_common/float16.py:70: UserWarning: the float32 number -7.349937103384718e-09 will be truncated to -1e-07
+  warnings.warn(
+/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/onnxconverter_common/float16.py:52: UserWarning: the float32 number 7.090610765203564e-09 will be truncated to 1e-07
+  warnings.warn(
+/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/onnxconverter_common/float16.py:70: UserWarning: the float32 number -1.1067315952573153e-09 will be truncated to -1e-07
+  warnings.warn(
+/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/onnxconverter_common/float16.py:52: UserWarning: the float32 number 8.207702073548262e-09 will be truncated to 1e-07
+  warnings.warn(
+/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/onnxconverter_common/float16.py:70: UserWarning: the float32 number -1.4572789197586644e-08 will be truncated to -1e-07
+  warnings.warn(
+/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/onnxconverter_common/float16.py:52: UserWarning: the float32 number 2.5203810594121023e-08 will be truncated to 1e-07
+  warnings.warn(
+/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/onnxconverter_common/float16.py:70: UserWarning: the float32 number -6.755731618568461e-08 will be truncated to -1e-07
+  warnings.warn(
+/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/onnxconverter_common/float16.py:52: UserWarning: the float32 number 9.135808198834638e-08 will be truncated to 1e-07
+  warnings.warn(
+/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/onnxconverter_common/float16.py:52: UserWarning: the float32 number 1.9280419039091612e-08 will be truncated to 1e-07
+  warnings.warn(
+/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/onnxconverter_common/float16.py:70: UserWarning: the float32 number -8.4486240226056e-09 will be truncated to -1e-07
+  warnings.warn(
+/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/onnxconverter_common/float16.py:70: UserWarning: the float32 number -3.8347518938053327e-08 will be truncated to -1e-07
+  warnings.warn(
+/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/onnxconverter_common/float16.py:52: UserWarning: the float32 number 6.903913174483023e-08 will be truncated to 1e-07
+  warnings.warn(
+/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/onnxconverter_common/float16.py:70: UserWarning: the float32 number -4.813611553800001e-08 will be truncated to -1e-07
+  warnings.warn(
+/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/onnxconverter_common/float16.py:52: UserWarning: the float32 number 5.745988129746138e-10 will be truncated to 1e-07
+  warnings.warn(
+/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/onnxconverter_common/float16.py:70: UserWarning: the float32 number -1.020249884575719e-09 will be truncated to -1e-07
+  warnings.warn(
+/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/onnxconverter_common/float16.py:52: UserWarning: the float32 number 4.386195939787285e-08 will be truncated to 1e-07
+  warnings.warn(
+/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/onnxconverter_common/float16.py:70: UserWarning: the float32 number -6.975774624606856e-08 will be truncated to -1e-07
+  warnings.warn(
+/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/onnxconverter_common/float16.py:52: UserWarning: the float32 number 3.0916378790379895e-08 will be truncated to 1e-07
+  warnings.warn(
+/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/onnxconverter_common/float16.py:70: UserWarning: the float32 number -1.7571409216543543e-08 will be truncated to -1e-07
+  warnings.warn(
+/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/onnxconverter_common/float16.py:52: UserWarning: the float32 number 3.192158690157321e-11 will be truncated to 1e-07
+  warnings.warn(
+/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/onnxconverter_common/float16.py:70: UserWarning: the float32 number -1.4989862129333176e-10 will be truncated to -1e-07
+  warnings.warn(
+/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/onnxconverter_common/float16.py:52: UserWarning: the float32 number 2.923954856015598e-09 will be truncated to 1e-07
+  warnings.warn(
+/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/onnxconverter_common/float16.py:70: UserWarning: the float32 number -3.5053910885096684e-09 will be truncated to -1e-07
+  warnings.warn(
+/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/onnxconverter_common/float16.py:52: UserWarning: the float32 number 2.2417259160079084e-08 will be truncated to 1e-07
+  warnings.warn(
+/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/onnxconverter_common/float16.py:70: UserWarning: the float32 number -9.944757550783834e-08 will be truncated to -1e-07
+  warnings.warn(
+/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/onnxconverter_common/float16.py:52: UserWarning: the float32 number 5.883143278095915e-11 will be truncated to 1e-07
+  warnings.warn(
+/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/onnxconverter_common/float16.py:70: UserWarning: the float32 number -1.3479463378818224e-10 will be truncated to -1e-07
+  warnings.warn(
+/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/onnxconverter_common/float16.py:52: UserWarning: the float32 number 3.474236454081847e-09 will be truncated to 1e-07
+  warnings.warn(
+/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/onnxconverter_common/float16.py:70: UserWarning: the float32 number -6.862145518482521e-09 will be truncated to -1e-07
+  warnings.warn(
+/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/onnxconverter_common/float16.py:52: UserWarning: the float32 number 1.605963717565828e-08 will be truncated to 1e-07
+  warnings.warn(
+/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/onnxconverter_common/float16.py:70: UserWarning: the float32 number -2.0738228911909573e-08 will be truncated to -1e-07
+  warnings.warn(
+/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/onnxconverter_common/float16.py:52: UserWarning: the float32 number 4.16736402331086e-11 will be truncated to 1e-07
+  warnings.warn(
+/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/onnxconverter_common/float16.py:70: UserWarning: the float32 number -4.897534044978613e-10 will be truncated to -1e-07
+  warnings.warn(
+/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/onnxconverter_common/float16.py:52: UserWarning: the float32 number 2.6815785703071526e-10 will be truncated to 1e-07
+  warnings.warn(
+/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/onnxconverter_common/float16.py:70: UserWarning: the float32 number -2.2145167644094244e-10 will be truncated to -1e-07
+  warnings.warn(
+/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/onnxconverter_common/float16.py:52: UserWarning: the float32 number 1.5885488480194e-08 will be truncated to 1e-07
+  warnings.warn(
+/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/onnxconverter_common/float16.py:70: UserWarning: the float32 number -1.169008090329271e-08 will be truncated to -1e-07
+  warnings.warn(
+/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/onnxconverter_common/float16.py:52: UserWarning: the float32 number 7.1067347562348e-08 will be truncated to 1e-07
+  warnings.warn(
+/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/onnxconverter_common/float16.py:70: UserWarning: the float32 number -3.870612275136409e-09 will be truncated to -1e-07
+  warnings.warn(
+/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/onnxconverter_common/float16.py:52: UserWarning: the float32 number 2.6566482347334386e-08 will be truncated to 1e-07
+  warnings.warn(
+/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/onnxconverter_common/float16.py:52: UserWarning: the float32 number 9.639479969791864e-08 will be truncated to 1e-07
+  warnings.warn(
+/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/onnxconverter_common/float16.py:70: UserWarning: the float32 number -3.3643892116685947e-09 will be truncated to -1e-07
+  warnings.warn(
+/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/onnxconverter_common/float16.py:52: UserWarning: the float32 number 3.3516531772193048e-09 will be truncated to 1e-07
+  warnings.warn(
+/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/onnxconverter_common/float16.py:70: UserWarning: the float32 number -1.7221521986243715e-08 will be truncated to -1e-07
+  warnings.warn(
+/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/onnxconverter_common/float16.py:52: UserWarning: the float32 number 5.209677134132562e-09 will be truncated to 1e-07
+  warnings.warn(
+/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/onnxconverter_common/float16.py:70: UserWarning: the float32 number -1.105213076613154e-08 will be truncated to -1e-07
+  warnings.warn(
+/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/onnxconverter_common/float16.py:52: UserWarning: the float32 number 3.575429396995844e-10 will be truncated to 1e-07
+  warnings.warn(
+/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/onnxconverter_common/float16.py:70: UserWarning: the float32 number -2.7906834620949894e-09 will be truncated to -1e-07
+  warnings.warn(
+/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/onnxconverter_common/float16.py:52: UserWarning: the float32 number 2.424146572366226e-08 will be truncated to 1e-07
+  warnings.warn(
+/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/onnxconverter_common/float16.py:70: UserWarning: the float32 number -5.5982916080665746e-09 will be truncated to -1e-07
+  warnings.warn(
+/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/onnxconverter_common/float16.py:70: UserWarning: the float32 number -7.933870449505775e-08 will be truncated to -1e-07
+  warnings.warn(
+/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/onnxconverter_common/float16.py:52: UserWarning: the float32 number 4.7277861625616424e-08 will be truncated to 1e-07
+  warnings.warn(
+/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/onnxconverter_common/float16.py:70: UserWarning: the float32 number -6.502723248758002e-09 will be truncated to -1e-07
+  warnings.warn(
+/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/onnxconverter_common/float16.py:70: UserWarning: the float32 number -7.821611092140301e-08 will be truncated to -1e-07
+  warnings.warn(
+/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/onnxconverter_common/float16.py:70: UserWarning: the float32 number -9.098405939766963e-08 will be truncated to -1e-07
+  warnings.warn(
+/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/onnxconverter_common/float16.py:52: UserWarning: the float32 number 8.410967922145574e-08 will be truncated to 1e-07
+  warnings.warn(
+/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/onnxconverter_common/float16.py:52: UserWarning: the float32 number 9.904602649157823e-08 will be truncated to 1e-07
+  warnings.warn(
+/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/onnxconverter_common/float16.py:70: UserWarning: the float32 number -6.48446558670912e-08 will be truncated to -1e-07
+  warnings.warn(
+/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/onnxconverter_common/float16.py:52: UserWarning: the float32 number 3.531811643142646e-08 will be truncated to 1e-07
+  warnings.warn(
+/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/onnxconverter_common/float16.py:70: UserWarning: the float32 number -6.23951201816908e-09 will be truncated to -1e-07
+  warnings.warn(
+/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/onnxconverter_common/float16.py:52: UserWarning: the float32 number 2.5868322595101745e-08 will be truncated to 1e-07
+  warnings.warn(
+/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/onnxconverter_common/float16.py:52: UserWarning: the float32 number 3.7138288971894085e-11 will be truncated to 1e-07
+  warnings.warn(
+/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/onnxconverter_common/float16.py:70: UserWarning: the float32 number -3.025232286901769e-09 will be truncated to -1e-07
+  warnings.warn(
+/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/onnxconverter_common/float16.py:52: UserWarning: the float32 number 5.8223065479978686e-08 will be truncated to 1e-07
+  warnings.warn(
+/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/onnxconverter_common/float16.py:70: UserWarning: the float32 number -6.532395957492554e-08 will be truncated to -1e-07
+  warnings.warn(
+/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/onnxconverter_common/float16.py:70: UserWarning: the float32 number -2.830711443024825e-09 will be truncated to -1e-07
+  warnings.warn(
+Downloading: "https://github.com/bshall/knn-vc/releases/download/v0.1/prematch_g_02500000.pt" to /home/runner/.cache/torch/hub/checkpoints/prematch_g_02500000.pt
+Removing weight norm...
+[HiFiGAN] Generator loaded with 16,523,393 parameters.
+Downloading: "https://github.com/bshall/knn-vc/releases/download/v0.1/WavLM-Large.pt" to /home/runner/.cache/torch/hub/checkpoints/WavLM-Large.pt
+WavLM-Large loaded with 315,453,120 parameters.
+features (149, 1024) wav (1, 47680)
+wavlm6.onnx matches PyTorch, cosine 1.0 size MB 355.1
+Traceback (most recent call last):
+  File "/home/runner/work/Voice-Mimickry/Voice-Mimickry/tools/export_knnvc_onnx.py", line 75, in <module>
+    s = ort.InferenceSession(f"{out}/{name}")
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/onnxruntime/capi/onnxruntime_inference_collection.py", line 683, in __init__
+    self._create_inference_session(providers, provider_options, disabled_optimizers)
+  File "/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/onnxruntime/capi/onnxruntime_inference_collection.py", line 778, in _create_inference_session
+    sess = C.InferenceSession(session_options, self._model_path, True, self._read_config_from_model)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+onnxruntime.capi.onnxruntime_pybind11_state.Fail: [ONNXRuntimeError] : 1 : FAIL : Load model from models/wavlm6.fp16.onnx failed:Type Error: Type (tensor(float16)) of output arg (/feature_extractor/conv_layers.0/conv_layers.0.2/conv_layers.0.2.1/Cast_output_0) of node (/feature_extractor/conv_layers.0/conv_layers.0.2/conv_layers.0.2.1/Cast) does not match expected type (tensor(float)).
