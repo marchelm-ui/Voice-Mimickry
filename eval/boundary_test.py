@@ -20,7 +20,8 @@ def run(data, spk, limit=20):
     auds = [dsp.load(f) for f in fs]
     asrs = bank.transcribe(auds)
     err_asr, err_dtw, wer_n, wer_d = [], [], 0, 0
-    for f, a, (txt, tok, ts) in zip(fs, auds, asrs):
+    err_end, leak = [], []
+    for f, a, (txt, tok, ts, _lp) in zip(fs, auds, asrs):
         truth = json.load(open(f[:-4] + ".json"))["words"]
         tw = [w for w, _, _ in truth]
         hyp = txt.split()
@@ -36,12 +37,20 @@ def run(data, spk, limit=20):
             t = truth[k][1] / dsp.SR
             err_asr.append(abs(asr_starts[k] - t))
             err_dtw.append(abs(spans[k][0] / dsp.SR - t))
+        for k in range(len(tw) - 1):
+            # word END: positive error = cut runs into the next word (audible leakage)
+            te, tn = truth[k][2] / dsp.SR, truth[k + 1][1] / dsp.SR
+            e = spans[k][1] / dsp.SR
+            err_end.append(e - te)
+            leak.append(e > tn + 0.015)
     def rep(e):
         e = np.array(e) * 1000
         return f"median {np.median(e):.0f} ms, within 25 ms {np.mean(e < 25):.0%}, within 50 ms {np.mean(e < 50):.0%}"
     print(f"{spk}: recognizer word errors {wer_n}/{wer_d}; boundaries scored {len(err_dtw)}")
     print("   recognizer timings :", rep(err_asr))
     print("   aligner            :", rep(err_dtw))
+    ee = np.abs(np.array(err_end)) * 1000
+    print(f"   word ends          : median {np.median(ee):.0f} ms, within 25 ms {np.mean(ee < 25):.0%}; cuts leaking into next word {np.mean(leak):.0%}")
     return err_asr, err_dtw
 
 

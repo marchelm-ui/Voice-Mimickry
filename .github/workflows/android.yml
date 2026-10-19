@@ -31,7 +31,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: android/dl
-          key: mimic-sherpa-1.13.8-kokoro-int8-v1_0-zipformer-en-2023-06-26-pocket-int8-2026-01-26
+          key: mimic-ort-1.28.2-sherpa-1.13.8-kokoro-int8-v1_0-zipformer-en-2023-06-26-pocket-int8-2026-01-26
 
       - name: Get the speech engine and models
         run: |
@@ -42,7 +42,9 @@ jobs:
           [ -s dl/kokoro.tar.bz2 ] || curl -fL --retry 3 -o dl/kokoro.tar.bz2 $B/tts-models/kokoro-int8-multi-lang-v1_0.tar.bz2
           [ -s dl/asr.tar.bz2 ] || curl -fL --retry 3 -o dl/asr.tar.bz2 $B/asr-models/sherpa-onnx-zipformer-en-2023-06-26.tar.bz2
           [ -s dl/pocket.tar.bz2 ] || curl -fL --retry 3 -o dl/pocket.tar.bz2 $B/tts-models/sherpa-onnx-pocket-tts-int8-2026-01-26.tar.bz2
+          [ -s dl/ort.aar ] || curl -fL --retry 3 -o dl/ort.aar https://github.com/csukuangfj/onnxruntime-libs/releases/download/v1.28.2/onnxruntime-android-1.28.2.zip
           cp dl/sherpa-onnx.aar app/libs/sherpa-onnx.aar
+          cp dl/ort.aar app/libs/onnxruntime-android.aar
           tar xjf dl/kokoro.tar.bz2; tar xjf dl/asr.tar.bz2; tar xjf dl/pocket.tar.bz2
           K=kokoro-int8-multi-lang-v1_0
           cp $K/model.int8.onnx $K/voices.bin $K/tokens.txt $K/lexicon-us-en.txt app/src/main/assets/kokoro/

@@ -61,6 +61,7 @@ dependencies {
     implementation("androidx.core:core-ktx:1.13.1")
     implementation("androidx.appcompat:appcompat:1.7.0")
     implementation(files("libs/sherpa-onnx.aar"))
-    implementation("com.microsoft.onnxruntime:onnxruntime-android:1.28.2")
+    // onnxruntime Java bindings, same 1.28.2 build sherpa-onnx links against (downloaded by CI)
+    implementation(files("libs/onnxruntime-android.aar"))
     testImplementation("junit:junit:4.13.2")
 }
