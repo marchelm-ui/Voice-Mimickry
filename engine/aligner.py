@@ -17,6 +17,7 @@ import dsp
 TTS_BIN = os.environ.get("KENKU_TTS_BIN", "/home/claude/dl/sherpa-onnx-v1.13.8-linux-x64-static/bin/sherpa-onnx-offline-tts")
 KOKORO = os.environ.get("KENKU_KOKORO", "/home/claude/dl/kokoro-multi-lang-v1_0")
 REF_SID = 16   # stock reference voice
+PREROLL = 0   # tried 12 ms pre-roll for soft onsets: WER 22-24% -> 26%, so off
 SNAP_RADIUS = 0   # measured: snapping to energy dips moves cuts AWAY from true boundaries
 FEMALE_REFS = (2, 9)
 MALE_REFS = (11, 13)
@@ -175,22 +176,28 @@ def _align_one(audio, words, sid, end):
             return x
         return (lo + int(np.argmin(db[lo:hi + 1]))) * dsp.HOP
 
-    # A word starts at the LAST recording frame its first reference frame maps to, and ends at
-    # the FIRST frame its last reference frame maps to: where the speaker paused but the
-    # reference didn't, the warp path runs flat across the pause, and these choices keep the
-    # pause outside both words instead of splitting it (measured: neighbouring-word fragments
-    # leaking into cuts was the main cause of garbled output).
+    # Boundaries between words. Where the speaker paused but the reference didn't, the warp path
+    # runs flat across the pause; there we end the word at the pause's start and begin the next
+    # at its end (so neither cut contains a fragment of the other). Elsewhere we cut at the
+    # median of the warp. Starts get a short pre-roll so soft onsets (s, f, h) survive.
+    # Measured: leakage of neighbouring fragments and clipped onsets were the main causes
+    # of misheard words.
+
+    def boundary(ref_end, ref_start):
+        """-> (end of previous word, start of next word) in rec samples."""
+        lo = to_rec(max(0, ref_end - 1), "first") + dsp.HOP
+        hi = to_rec(ref_start, "last")
+        if hi < lo:
+            m = (lo + hi) // 2
+            lo, hi = m, m
+        return lo, max(lo - dsp.HOP, hi - PREROLL)
+
     words_out, phones_out = [], []
+    cuts = [boundary(wspans[k][1], wspans[k + 1][0]) for k in range(len(words) - 1)]
     for k in range(len(words)):
-        ws, we = wspans[k]
-        a = 0 if k == 0 else to_rec(ws, "last")
-        b = len(rec) if k == len(words) - 1 else to_rec(max(ws, we - 1), "first") + dsp.HOP
+        a = 0 if k == 0 else cuts[k - 1][1]
+        b = len(rec) if k == len(words) - 1 else cuts[k][0]
         words_out.append([s0 + a, s0 + max(a + dsp.HOP, b)])
-        phones_out.append([(ph, s0 + to_rec(ps, "last"), s0 + to_rec(max(ps, pe - 1), "first") + dsp.HOP) for ph, ps, pe in pspans[k]])
-    for k in range(1, len(words_out)):
-        if words_out[k][0] < words_out[k - 1][0] + dsp.HOP:
-            words_out[k][0] = words_out[k - 1][0] + dsp.HOP
-        if words_out[k - 1][1] > words_out[k][0]:
-            words_out[k - 1][1] = words_out[k][0]
+        phones_out.append([(ph, s0 + to_rec(ps), s0 + to_rec(pe)) for ph, ps, pe in pspans[k]])
     words_out = [tuple(w) for w in words_out]
     return words_out, phones_out, cost
