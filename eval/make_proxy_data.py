@@ -5,7 +5,7 @@ lines (ground truth: that same person actually saying the new line). Ground trut
 the scorer compare the engine against the real thing, and the exact timings let us
 measure how accurately the engine cuts words.
 
-Usage: python3 make_proxy_data.py <out dir>
+Usage: python3 make_proxy_data.py <out dir> [speaker ...]
 """
 import json
 import os
@@ -44,7 +44,10 @@ def say(sentence, sid):
 
 def main():
     out = sys.argv[1]
+    only = sys.argv[2:] or list(SPEAKERS)
     for name, sid in SPEAKERS.items():
+        if name not in only:
+            continue
         for split, lines in (("train", TRAIN), ("truth", TEST)):
             d = os.path.join(out, name, split)
             os.makedirs(d, exist_ok=True)

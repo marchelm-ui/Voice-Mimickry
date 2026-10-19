@@ -1,0 +1,113 @@
+name: Benchmark the engine
+
+# Runs the head-to-head benchmark on GitHub's machines, one job per stand-in voice in parallel,
+# and commits the merged scores to the eval-results branch.
+on:
+  workflow_dispatch:
+    inputs:
+      lines:
+        description: "Test lines per voice (max 15)"
+        default: "15"
+      systems:
+        description: "Systems to compare"
+        default: "truth,kenku,kenku_naive,pocket,other_voice"
+      variants:
+        description: "Optional ablation variants, e.g. 'a=prosody:0 b=timing:0'"
+        default: ""
+  push:
+    branches: [main]
+    paths: ["engine/**", "eval/**", ".github/workflows/eval.yml"]
+
+permissions:
+  contents: write
+
+env:
+  KENKU_ASR_BIN: ${{ github.workspace }}/m/sherpa-onnx-v1.13.8-linux-x64-static/bin/sherpa-onnx-offline
+  KENKU_TTS_BIN: ${{ github.workspace }}/m/sherpa-onnx-v1.13.8-linux-x64-static/bin/sherpa-onnx-offline-tts
+  KENKU_ASR_DIR: ${{ github.workspace }}/m/sherpa-onnx-zipformer-en-2023-06-26
+  KENKU_KOKORO: ${{ github.workspace }}/m/kokoro-multi-lang-v1_0
+  KENKU_POCKET: ${{ github.workspace }}/m/sherpa-onnx-pocket-tts-int8-2026-01-26
+  KENKU_SPK: ${{ github.workspace }}/m/wespeaker_en_voxceleb_resnet34.onnx
+  KENKU_DNSMOS: ${{ github.workspace }}/m/dns/DNSMOS/DNSMOS/sig_bak_ovr.onnx
+
+jobs:
+  voice:
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        speaker: [heart, michael, george]
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Reuse downloaded models
+        uses: actions/cache@v4
+        with:
+          path: m
+          key: eval-models-v1
+      - name: Get models and tools
+        run: |
+          set -euo pipefail
+          pip install -q numpy scipy onnxruntime
+          mkdir -p m && cd m
+          B=https://github.com/k2-fsa/sherpa-onnx/releases/download
+          for u in v1.13.8/sherpa-onnx-v1.13.8-linux-x64-static.tar.bz2 asr-models/sherpa-onnx-zipformer-en-2023-06-26.tar.bz2 \
+                   tts-models/kokoro-multi-lang-v1_0.tar.bz2 tts-models/sherpa-onnx-pocket-tts-int8-2026-01-26.tar.bz2; do
+            d=$(basename $u .tar.bz2)
+            [ -d "$d" ] || { curl -fsSL --retry 3 $B/$u | tar xj; }
+          done
+          [ -s wespeaker_en_voxceleb_resnet34.onnx ] || curl -fsSL --retry 3 -o wespeaker_en_voxceleb_resnet34.onnx $B/speaker-recongition-models/wespeaker_en_voxceleb_resnet34.onnx
+          [ -d dns ] || { git clone -q --depth 1 --filter=blob:none --sparse https://github.com/microsoft/DNS-Challenge dns && (cd dns && git sparse-checkout set DNSMOS); }
+          ls
+      - name: Make the stand-in voice
+        run: python3 eval/make_proxy_data.py data ${{ matrix.speaker }}
+      - name: Learn the voice
+        run: python3 eval/build_banks.py data ${{ matrix.speaker }}
+      - name: Benchmark
+        run: |
+          set -o pipefail
+          mkdir -p out
+          python3 eval/benchmark.py data out ${{ matrix.speaker }} --lines ${{ inputs.lines || '15' }} \
+            --systems ${{ inputs.systems || 'truth,kenku,kenku_naive,pocket,other_voice' }} 2>&1 | tee out/log.txt
+          if [ -n "${{ inputs.variants }}" ]; then
+            python3 eval/ablate.py data ${{ matrix.speaker }} ${{ inputs.lines || '15' }} ${{ inputs.variants }} | tee out/ablate.txt
+          fi
+          mv out/results.json out/results-${{ matrix.speaker }}.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: eval-${{ matrix.speaker }}
+          path: out
+
+  report:
+    needs: voice
+    if: always()
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/download-artifact@v4
+        with:
+          path: res
+      - name: Commit scores and samples to eval-results
+        run: |
+          pip install -q numpy scipy
+          mkdir -p /tmp/r
+          python3 eval/benchmark.py --summarize res/*/results-*.json > /tmp/r/SUMMARY.txt 2>&1 || true
+          cat /tmp/r/SUMMARY.txt
+          cp res/*/results-*.json /tmp/r/ 2>/dev/null || true
+          cat res/*/ablate.txt > /tmp/r/ABLATE.txt 2>/dev/null || true
+          mkdir -p /tmp/r/wav && cp res/*/*.wav /tmp/r/wav/ 2>/dev/null || true
+          echo "run ${{ github.run_number }} commit ${{ github.sha }}" > /tmp/r/RUN.txt
+          git config user.name build-bot
+          git config user.email build-bot@users.noreply.github.com
+          git checkout -q --orphan eval-results
+          git rm -rf -q --cached . > /dev/null
+          rm -rf ./* ./.github
+          cp -r /tmp/r/* .
+          git add -f -A
+          git commit -q -m "Eval run ${{ github.run_number }}"
+          git push -q -f origin eval-results

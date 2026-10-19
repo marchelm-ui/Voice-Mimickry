@@ -128,7 +128,7 @@ def summarize(rows):
     for r in rows:
         if r["system"] == "truth":
             truth_seam[(r["speaker"], r["line"])] = r["seam"]
-    print(f"{'system':<16}{'WER':>7}{'SpkSim':>8}{'SIG':>6}{'OVRL':>6}{'Seam':>7}{'MCD':>7}{'F0corr':>8}{'sec':>6}")
+    print(f"{'system':<16}{'WER':>7}{'SpkSim':>8}{'SIG':>6}{'OVRL':>6}{'Seam':>7}{'Dist':>7}{'F0corr':>8}{'sec':>6}")
     for s in systems:
         rs = [r for r in rows if r["system"] == s]
         w = sum(r["wer_err"] for r in rs) / max(1, sum(r["wer_n"] for r in rs))
@@ -138,5 +138,15 @@ def summarize(rows):
               f"{np.mean([r['f0_corr'] for r in rs]):>8.2f}{np.mean([r['secs'] for r in rs]):>6.1f}")
 
 
+def summarize_files(paths):
+    rows = []
+    for p in paths:
+        rows += json.load(open(p))
+    summarize(rows)
+
+
 if __name__ == "__main__":
-    main()
+    if len(sys.argv) > 1 and sys.argv[1] == "--summarize":
+        summarize_files(sys.argv[2:])
+    else:
+        main()
