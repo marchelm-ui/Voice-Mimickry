@@ -30,6 +30,21 @@ marked **[engine]** are built into Voice Mimickry; **[app]** are planned for the
 14. **Intelligibility is measurable** with a recognizer (word error rate). [measured]
 15. **Blind, randomized listening is the only honest naturalness test.** Vendor studies (e.g. a 65% preference win claimed by one vendor against a competitor) are not independent. [eval]
 
+## Measured in this project (most important first)
+
+These come from Voice Mimickry's own benchmarks and a blind listening test, and they reorder
+some of the list above.
+
+- **Human ears beat metrics.** In a blind A/B test the neural clone sounded more human than the word-stitching engine 6 of 6 times, and "sounds like the person" was a 3-3 tie, while the speaker-similarity metric scored the stitched voice far higher (0.71-0.81 vs 0.37). Speaker-embedding similarity rewards real recorded sound but can't hear unnatural seams or melody.
+- **Stitched words are hard to understand when the bank is small.** With 3.5 minutes of a real reader, a recognizer misheard 65% of words in new sentences (vs 8% for a neural clone), mostly because new sentences need many words she never said.
+- **Neighbouring-word fragments were the #1 cause of garbled words.** Ending each word at the first matching moment and starting the next at the last cut misheard words from 79% to about 23%.
+- **For unheard words, a neural patch beats splicing sounds:** 20-28% vs 64-96% misheard.
+- **Snapping cuts to quiet points makes them worse** (median error 10 to 40 ms); pre-roll for soft consonants also hurt (22-24% to 26%).
+- **Matching the alignment reader's pitch range matters:** 70 ms vs 5 ms median boundary error on a female voice.
+- **Neighbour-context unit preference:** no measurable gain.
+- **Half-resolution time warping** keeps boundary accuracy (96% within 25 ms) at a quarter of the memory, which matters on a phone.
+- **ElevenLabs via a proxy can trip its abuse detection** ("unusual activity", free tier disabled).
+
 ## Tier 2: big quality differences between engines
 
 16. Flow-matching / diffusion models (F5-TTS) give the best open-source long-form prosody but need 12–16 GB of GPU memory; impossible on a phone today.
