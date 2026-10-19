@@ -54,8 +54,8 @@ jobs:
           set -euo pipefail
           pip install -q numpy scipy onnxruntime
           pip install -q torch torchaudio --index-url https://download.pytorch.org/whl/cpu
-          [ -d knnvc ] || git clone -q --depth 1 https://github.com/bshall/knn-vc knnvc
           mkdir -p m && cd m
+          [ -d knnvc ] || git clone -q --depth 1 https://github.com/bshall/knn-vc knnvc
           B=https://github.com/k2-fsa/sherpa-onnx/releases/download
           for u in v1.13.8/sherpa-onnx-v1.13.8-linux-x64-static.tar.bz2 asr-models/sherpa-onnx-zipformer-en-2023-06-26.tar.bz2 \
                    tts-models/kokoro-multi-lang-v1_0.tar.bz2 tts-models/sherpa-onnx-pocket-tts-int8-2026-01-26.tar.bz2; do
@@ -94,9 +94,11 @@ jobs:
           fi
           mv out/results.json out/results-${{ matrix.speaker }}.json
       - uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: eval-${{ matrix.speaker }}
           path: out
+          if-no-files-found: ignore
 
   report:
     needs: voice
@@ -118,6 +120,7 @@ jobs:
           cat /tmp/r/SUMMARY.txt
           cp res/*/results-*.json /tmp/r/ 2>/dev/null || true
           cat res/*/ablate.txt > /tmp/r/ABLATE.txt 2>/dev/null || true
+          for f in res/*/log.txt; do cp "$f" "/tmp/r/log-$(basename $(dirname $f)).txt" 2>/dev/null; done || true
           mkdir -p /tmp/r/wav && cp res/*/*.wav /tmp/r/wav/ 2>/dev/null || true
           echo "run ${{ github.run_number }} commit ${{ github.sha }}" > /tmp/r/RUN.txt
           git config user.name build-bot
