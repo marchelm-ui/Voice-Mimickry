@@ -27,6 +27,14 @@ def load(path, sr=SR):
     return resample(x, rate, sr)
 
 
+def load_any(path, sr=SR):
+    """Any audio file ffmpeg can read -> mono float at `sr`."""
+    import subprocess
+    raw = subprocess.run(["ffmpeg", "-loglevel", "error", "-i", path, "-f", "f32le", "-ac", "1", "-ar", str(sr), "-"],
+                         capture_output=True, check=True).stdout
+    return np.frombuffer(raw, dtype=np.float32).copy()
+
+
 def save(path, x, sr=SR):
     y = np.clip(x, -1.0, 1.0)
     wavfile.write(path, sr, (y * 32767.0).astype(np.int16))

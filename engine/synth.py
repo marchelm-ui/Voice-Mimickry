@@ -27,7 +27,7 @@ import text as textmod
 PAUSE_S = {",": 0.20, ".": 0.38, "!": 0.34, "?": 0.38}
 XFADE = int(0.006 * dsp.SR)
 MARGIN = int(0.004 * dsp.SR)
-CONTEXT_WEIGHT = 0.25
+CONTEXT_WEIGHT = 0.0
 
 POCKET = os.environ.get("KENKU_POCKET", "/home/claude/dl/sherpa-onnx-pocket-tts-int8-2026-01-26")
 TTS_BIN = os.environ.get("KENKU_TTS_BIN", "/home/claude/dl/sherpa-onnx-v1.13.8-linux-x64-static/bin/sherpa-onnx-offline-tts")
@@ -42,7 +42,7 @@ class Opts:
     room_tone: bool = True
     match_loudness: bool = True
     max_span: int = 8
-    context: float = 0.25          # weight for matching neighbouring words
+    context: float = 0.0           # neighbour matching: no measurable gain in A/B, off
     diphone: bool = True           # join spliced sounds mid-phone
 
 
@@ -327,7 +327,7 @@ def _unit_audio(bank, path, words, opts, phrase_words):
             w = words[pos]["w"]
             u = Unit([words[pos]], kind="phones")
             x = None
-            if opts.fallback in ("phones", "auto"):
+            if opts.fallback == "phones":
                 x = splice_word_diphone(bank, w) if opts.diphone else splice_word(bank, w)
             if x is None:
                 u.kind = "neural"
@@ -346,12 +346,25 @@ def _unit_audio(bank, path, words, opts, phrase_words):
         u.word_lens[-1] += MARGIN
         units.append(u)
     if need_neural:
-        if opts.fallback == "phones":
+        got = None
+        if opts.fallback in ("neural", "auto"):
+            try:
+                got = neural_words(bank, phrase_words, [pos for _, pos in need_neural])
+            except Exception:
+                got = None
+        if got is None and opts.fallback == "auto":
+            # no neural clone available: build from the voice's own sounds
+            for ui, pos in need_neural:
+                x = splice_word_diphone(bank, words[pos]["w"])
+                if x is not None:
+                    units[ui].audio, units[ui].word_lens, units[ui].kind = x, [len(x)], "phones"
+        if got is None:
             for ui, _ in need_neural:
+                if units[ui].audio is not None:
+                    continue
                 units[ui].audio = np.zeros(int(0.25 * dsp.SR), dtype=np.float32)
                 units[ui].word_lens = [len(units[ui].audio)]
         else:
-            got = neural_words(bank, phrase_words, [pos for _, pos in need_neural])
             for ui, pos in need_neural:
                 units[ui].audio = got[pos]
                 units[ui].word_lens = [len(got[pos])]

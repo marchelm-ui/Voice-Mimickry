@@ -74,6 +74,16 @@ def run_system(name, spk, bank, line, i, data):
         return synth.speak(bank, line, o)
     if name == "pocket":
         return pocket(bank, line), {}
+    if name == "elevenlabs":
+        # ElevenLabs v4 stock narrator, fetched by CI into the external-audio branch
+        ext = os.environ.get("KENKU_EXTERNAL", "/home/claude/external")
+        if spk.startswith("ls"):
+            raise FileNotFoundError("no ElevenLabs takes for LibriSpeech lines")
+        key = ("L" if spk == "lj" else "T") + str(i)
+        f = f"{ext}/elevenlabs/{key}.mp3"
+        if not os.path.exists(f):
+            raise FileNotFoundError(f)
+        return dsp.load_any(f), {}
     if name == "other_voice":
         if spk not in OTHER:
             return np.zeros(dsp.SR, dtype=np.float32), {}
@@ -103,7 +113,10 @@ def main():
             truth = dsp.load(f"{a.data}/{spk}/truth/{i:03d}.wav")
             for s in systems:
                 t = time.time()
-                x, rep = run_system(s, spk, bank, line, i, a.data)
+                try:
+                    x, rep = run_system(s, spk, bank, line, i, a.data)
+                except FileNotFoundError:
+                    continue
                 dt = time.time() - t
                 p = f"{a.out}/{spk}_{i:03d}_{s}{a.tag}.wav"
                 dsp.save(p, x)

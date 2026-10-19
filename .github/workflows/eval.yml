@@ -10,7 +10,7 @@ on:
         default: "15"
       systems:
         description: "Systems to compare"
-        default: "truth,kenku,kenku_naive,pocket,other_voice"
+        default: "truth,kenku,kenku_naive,pocket,other_voice,elevenlabs"
       variants:
         description: "Optional ablation variants, e.g. 'a=prosody:0 b=timing:0'"
         default: ""
@@ -28,6 +28,7 @@ env:
   KENKU_KOKORO: ${{ github.workspace }}/m/kokoro-multi-lang-v1_0
   KENKU_POCKET: ${{ github.workspace }}/m/sherpa-onnx-pocket-tts-int8-2026-01-26
   KENKU_SPK: ${{ github.workspace }}/m/wespeaker_en_voxceleb_resnet34.onnx
+  KENKU_EXTERNAL: ${{ github.workspace }}/ext
   KENKU_DNSMOS: ${{ github.workspace }}/m/dns/DNSMOS/DNSMOS/sig_bak_ovr.onnx
 
 jobs:
@@ -36,7 +37,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        speaker: [heart, michael, george]
+        speaker: [heart, michael, george, lj, ls1673, ls1919, ls3853, ls422]
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-python@v5
@@ -61,8 +62,22 @@ jobs:
           [ -s wespeaker_en_voxceleb_resnet34.onnx ] || curl -fsSL --retry 3 -o wespeaker_en_voxceleb_resnet34.onnx $B/speaker-recongition-models/wespeaker_en_voxceleb_resnet34.onnx
           [ -d dns ] || { git clone -q --depth 1 --filter=blob:none --sparse https://github.com/microsoft/DNS-Challenge dns && (cd dns && git sparse-checkout set DNSMOS); }
           ls
-      - name: Make the stand-in voice
-        run: python3 eval/make_proxy_data.py data ${{ matrix.speaker }}
+      - name: Get outside audio (ElevenLabs takes, real LibriSpeech voices)
+        run: git fetch -q --depth 1 origin external-audio && git worktree add -q ext FETCH_HEAD
+      - name: Make the voice data
+        run: |
+          set -euo pipefail
+          sudo apt-get install -y -qq ffmpeg > /dev/null
+          case "${{ matrix.speaker }}" in
+            ls*)
+              python3 eval/prepare_librispeech.py ext/librispeech data ;;
+            lj)
+              git clone -q --depth 1 --filter=blob:none --sparse https://github.com/coqui-ai/TTS coqui
+              (cd coqui && git sparse-checkout set tests/data/ljspeech)
+              python3 eval/prepare_lj.py coqui/tests/data/ljspeech data ;;
+            *)
+              python3 eval/make_proxy_data.py data ${{ matrix.speaker }} ;;
+          esac
       - name: Learn the voice
         run: python3 eval/build_banks.py data ${{ matrix.speaker }}
       - name: Benchmark
@@ -70,7 +85,7 @@ jobs:
           set -o pipefail
           mkdir -p out
           python3 eval/benchmark.py data out ${{ matrix.speaker }} --lines ${{ inputs.lines || '15' }} \
-            --systems ${{ inputs.systems || 'truth,kenku,kenku_naive,pocket,other_voice' }} 2>&1 | tee out/log.txt
+            --systems ${{ inputs.systems || 'truth,kenku,kenku_naive,pocket,other_voice,elevenlabs' }} 2>&1 | tee out/log.txt
           if [ -n "${{ inputs.variants }}" ]; then
             python3 eval/ablate.py data ${{ matrix.speaker }} ${{ inputs.lines || '15' }} ${{ inputs.variants }} | tee out/ablate.txt
           fi
