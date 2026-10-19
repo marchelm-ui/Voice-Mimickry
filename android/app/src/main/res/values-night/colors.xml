@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="bg">#12151F</color>
+    <color name="surface">#1B2030</color>
+    <color name="ink">#E7E9F0</color>
+    <color name="muted">#9AA2B8</color>
+    <color name="line">#2D3448</color>
+    <color name="accent">#8C9BEA</color>
+    <color name="accent_ink">#12151F</color>
+    <color name="brass">#D9A54E</color>
+    <color name="danger">#F08A78</color>
+    <color name="tab_on">#28304A</color>
+    <color name="ripple">#448C9BEA</color>
+</resources>

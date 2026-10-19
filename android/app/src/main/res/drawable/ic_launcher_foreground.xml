@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Mocking Bird: a black bird's face in a hooded cloak, facing you. Only the cloak, red eyes and beak show. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:fillColor="#33363F"
+        android:pathData="M54,13 C71,13 84,27 86,45 C88,62 92,80 101,100 L7,100 C16,80 20,62 22,45 C24,27 37,13 54,13 Z" />
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#1E2026"
+        android:strokeWidth="2"
+        android:strokeLineCap="round"
+        android:pathData="M54,14 C48,17 44,21 41,26" />
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#1E2026"
+        android:strokeWidth="2"
+        android:strokeLineCap="round"
+        android:pathData="M36,84 C32,90 28,95 24,100 M72,84 C76,90 80,95 84,100 M54,88 L54,100" />
+    <path
+        android:fillColor="#000000"
+        android:strokeColor="#6A6F7C"
+        android:strokeWidth="2.4"
+        android:pathData="M54,26 C66,26 75,36 75,50 C75,66 66,79 54,87 C42,79 33,66 33,50 C33,36 42,26 54,26 Z" />
+    <path
+        android:fillColor="#E3201B"
+        android:pathData="M37.5,47 Q44,42.5 50.5,48.5 Q44,52.5 37.5,47 Z" />
+    <path
+        android:fillColor="#E3201B"
+        android:pathData="M70.5,47 Q64,42.5 57.5,48.5 Q64,52.5 70.5,47 Z" />
+    <path
+        android:fillColor="#FF8A80"
+        android:pathData="M43.9,48 a1.1,1.1 0 1,0 2.2,0 a1.1,1.1 0 1,0 -2.2,0 Z" />
+    <path
+        android:fillColor="#FF8A80"
+        android:pathData="M61.9,48 a1.1,1.1 0 1,0 2.2,0 a1.1,1.1 0 1,0 -2.2,0 Z" />
+    <path
+        android:fillColor="#B8AE96"
+        android:pathData="M47.5,54 C50,52.8 58,52.8 60.5,54 L54,77 Z" />
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#857B66"
+        android:strokeWidth="1.2"
+        android:strokeLineCap="round"
+        android:pathData="M54,54.5 L54,74" />
+</vector>

@@ -1,0 +1,91 @@
+name: Build Voice Mimickry app
+
+on:
+  push:
+    branches: [main]
+    paths: ["android/**", ".github/workflows/android.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: android
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.7"
+
+      - name: Reuse downloaded models
+        uses: actions/cache@v4
+        with:
+          path: android/dl
+          key: mimic-sherpa-1.13.8-kokoro-int8-v1_0-zipformer-en-2023-06-26-pocket-int8-2026-01-26
+
+      - name: Get the speech engine and models
+        run: |
+          set -euo pipefail
+          mkdir -p dl app/libs app/src/main/assets/{kokoro,asr,pocket}
+          B=https://github.com/k2-fsa/sherpa-onnx/releases/download
+          [ -s dl/sherpa-onnx.aar ] || curl -fL --retry 3 -o dl/sherpa-onnx.aar $B/v1.13.8/sherpa-onnx-1.13.8.aar
+          [ -s dl/kokoro.tar.bz2 ] || curl -fL --retry 3 -o dl/kokoro.tar.bz2 $B/tts-models/kokoro-int8-multi-lang-v1_0.tar.bz2
+          [ -s dl/asr.tar.bz2 ] || curl -fL --retry 3 -o dl/asr.tar.bz2 $B/asr-models/sherpa-onnx-zipformer-en-2023-06-26.tar.bz2
+          [ -s dl/pocket.tar.bz2 ] || curl -fL --retry 3 -o dl/pocket.tar.bz2 $B/tts-models/sherpa-onnx-pocket-tts-int8-2026-01-26.tar.bz2
+          cp dl/sherpa-onnx.aar app/libs/sherpa-onnx.aar
+          tar xjf dl/kokoro.tar.bz2; tar xjf dl/asr.tar.bz2; tar xjf dl/pocket.tar.bz2
+          K=kokoro-int8-multi-lang-v1_0
+          cp $K/model.int8.onnx $K/voices.bin $K/tokens.txt $K/lexicon-us-en.txt app/src/main/assets/kokoro/
+          Z=sherpa-onnx-zipformer-en-2023-06-26
+          cp $Z/encoder-epoch-99-avg-1.int8.onnx app/src/main/assets/asr/encoder.int8.onnx
+          cp $Z/decoder-epoch-99-avg-1.onnx app/src/main/assets/asr/decoder.onnx
+          cp $Z/joiner-epoch-99-avg-1.int8.onnx app/src/main/assets/asr/joiner.int8.onnx
+          cp $Z/tokens.txt app/src/main/assets/asr/tokens.txt
+          P=sherpa-onnx-pocket-tts-int8-2026-01-26
+          cp $P/lm_flow.int8.onnx $P/lm_main.int8.onnx $P/encoder.onnx $P/decoder.int8.onnx $P/text_conditioner.onnx $P/vocab.json $P/token_scores.json app/src/main/assets/pocket/
+          du -sh app/src/main/assets/*
+          unzip -l app/libs/sherpa-onnx.aar | grep -E '\.so$' || true
+
+      - name: Engine unit tests
+        run: gradle :app:testReleaseUnitTest --no-daemon 2>&1 | tee test-log.txt
+
+      - name: Build the APK
+        run: gradle :app:assembleRelease --no-daemon 2>&1 | tee build-log.txt
+
+      - name: Check the APK
+        run: |
+          set -euo pipefail
+          cp app/build/outputs/apk/release/app-release.apk VoiceMimickry.apk
+          ls -la VoiceMimickry.apk
+          unzip -l VoiceMimickry.apk | grep -E 'libonnxruntime|libsherpa|onnxruntime4j|assets/(kokoro|asr|pocket)/'
+          ZA=$(ls -d $ANDROID_HOME/build-tools/*/ | sort -V | tail -1)zipalign
+          $ZA -c -P 16 4 VoiceMimickry.apk && echo "16 KB page alignment OK"
+
+      - name: Keep the test report if tests failed
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reports
+          path: |
+            android/app/build/reports
+            android/test-log.txt
+            android/build-log.txt
+
+      - name: Publish as the latest release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: build-${{ github.run_number }}
+          name: Voice Mimickry build ${{ github.run_number }}
+          body: "Download VoiceMimickry.apk on your Android phone and open it to install. Teach it a voice in the Voices tab, then make your kenku talk in the Speak tab."
+          files: android/VoiceMimickry.apk
+          make_latest: true

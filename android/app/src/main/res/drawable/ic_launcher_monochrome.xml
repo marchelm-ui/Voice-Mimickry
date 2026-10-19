@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Themed-icon version: hood with the face cut out, plus the eyes and beak. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:fillType="evenOdd"
+        android:pathData="M54,13 C71,13 84,27 86,45 C88,62 92,80 101,100 L7,100 C16,80 20,62 22,45 C24,27 37,13 54,13 Z M54,28 C65,28 73,37 73,50 C73,65 65,77 54,84.5 C43,77 35,65 35,50 C35,37 43,28 54,28 Z" />
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M37.5,47 Q44,42.5 50.5,48.5 Q44,52.5 37.5,47 Z M70.5,47 Q64,42.5 57.5,48.5 Q64,52.5 70.5,47 Z M47.5,54 C50,52.8 58,52.8 60.5,54 L54,77 Z" />
+</vector>
