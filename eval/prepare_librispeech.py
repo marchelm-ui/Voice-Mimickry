@@ -22,7 +22,9 @@ def main():
         for line in open(f"{spk_dir}/trans.txt"):
             k, _, t = line.strip().partition(" ")
             trans[k] = t
-        ids = sorted(k for k in trans if os.path.exists(f"{spk_dir}/{k}.flac"))
+        # very long readings overflow the reference reader's 512-token text model during
+        # alignment (speaker 422 has 30-second sentences), so keep utterances conversational
+        ids = sorted(k for k in trans if os.path.exists(f"{spk_dir}/{k}.flac") and len(trans[k].split()) <= 40)
         rnd = random.Random(1)
         # hold out medium-length sentences: easier to compare, like table talk
         mid = [k for k in ids if 4 <= len(trans[k].split()) <= 16]

@@ -86,7 +86,7 @@ def run_system(name, spk, bank, line, i, data):
             src = say(line, sid)[0]
         if name == "knnvc_shift" and bank.f0_median > 0:
             # kNN-VC follows the guide's prosody, so bend the guide into the person's pitch range
-            f0 = dsp.f0_yin(src)
+            f0, _ = dsp.f0_yin(src)
             med = float(np.median(f0[f0 > 0])) if (f0 > 0).any() else 0.0
             if med > 0:
                 ratio = min(2.0, max(0.5, bank.f0_median / med))

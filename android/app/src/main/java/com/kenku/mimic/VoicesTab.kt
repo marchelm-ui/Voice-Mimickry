@@ -184,11 +184,14 @@ class VoicesTab(private val a: MainActivity) {
             segs.forEachIndexed { i, s ->
                 a.main.post { a.setStatus("Learning ${v.name}'s voice… ${i + 1}/${segs.size}") }
                 val piece = audio.copyOfRange(s[0], s[1])
-                val words = a.engine.recognizer().words(piece)
-                if (words.isNotEmpty()) {
-                    val r = VoiceBank.capture("r" + System.nanoTime(), piece, words, 0.9, a.engine.aligner)
-                    if (r.words.isNotEmpty()) { v.add(r); v.saveRecording(r); learned += r.words.size }
-                }
+                // one bad stretch (too long for the reference reader, pure noise) skips, not aborts
+                try {
+                    val words = a.engine.recognizer().words(piece)
+                    if (words.isNotEmpty()) {
+                        val r = VoiceBank.capture("r" + System.nanoTime(), piece, words, 0.9, a.engine.aligner)
+                        if (r.words.isNotEmpty()) { v.add(r); v.saveRecording(r); learned += r.words.size }
+                    }
+                } catch (e: Throwable) { /* skip this stretch */ }
             }
             learned
         }) { r ->
