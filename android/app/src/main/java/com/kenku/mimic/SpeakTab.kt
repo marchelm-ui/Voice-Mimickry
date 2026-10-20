@@ -308,7 +308,14 @@ class SpeakTab(private val a: MainActivity) {
                                 val n = if (rotateKey == "w1") 1 else 3
                                 TextNorm.words(sent).chunked(n).map { it.joinToString(" ") }
                             }
-                            else -> listOf(sent)
+                            else -> {
+                                // long sentences stream in small fluid pieces, so the first sound
+                                // arrives in a couple of seconds instead of after the whole sentence
+                                val ws = TextNorm.words(sent)
+                                if (how == "mimic" && ws.size > 8) {
+                                    (listOf(ws.take(4)) + ws.drop(4).chunked(7)).map { it.joinToString(" ") }
+                                } else listOf(sent)
+                            }
                         }
                         groups.forEachIndexed { gi, chunk ->
                             val speaker = cast[castAt % cast.size]

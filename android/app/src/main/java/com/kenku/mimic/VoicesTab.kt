@@ -44,7 +44,10 @@ class VoicesTab(private val a: MainActivity) {
         list.removeAllViews()
         if (!a.engine.ready) { list.addView(ui.body("Loading…")); return }
         if (a.engine.voices.isEmpty()) list.addView(ui.body("No voices yet."))
-        for (v in a.engine.voices) list.addView(card(v), ui.fill(12))
+        for (v in a.engine.voices) {
+            list.addView(card(v), ui.fill(12))
+            if (v.recs.any { it.words.isEmpty() }) polish(v)   // resume word-learning after a restart
+        }
         val have = a.engine.voices.map { it.name }.toSet()
         val starters = a.engine.presets().filter { it.name !in have }
         if (starters.isNotEmpty()) {
@@ -74,8 +77,8 @@ class VoicesTab(private val a: MainActivity) {
             a.setStatus(null)
             r.onSuccess { v ->
                 a.prefs.edit().putBoolean("hasVoice", true).apply()
-                refresh(); a.toast("${p.name} is ready in the Speak tab.")
-                a.work({ a.engine.pool(v) }) {}              // build the mimicry pool now, not on the first line
+                refresh(); a.toast("${p.name} can speak now — try the Speak tab.")
+                polish(v)                                    // word positions arrive in the background
             }.onFailure { a.toast("Couldn't add ${p.name}: ${it.message}") }
         }
     }
@@ -83,7 +86,13 @@ class VoicesTab(private val a: MainActivity) {
     private fun card(v: VoiceBank) = ui.card().apply {
         addView(ui.heading("🦜 ${v.name}"))
         val mins = v.seconds / 60
-        addView(ui.body("%.1f min heard · %d words · %d different words".format(mins, v.wordCount, v.vocabulary().size)), ui.fill(8))
+        val left = v.recs.count { it.words.isEmpty() }
+        val state = when {
+            v.recs.isEmpty() -> "Nothing heard yet"
+            left > 0 -> "%.1f min heard · ready to speak · 🪶 learning words: %d of %d recordings left".format(mins, left, v.recs.size)
+            else -> "%.1f min heard · %d words · %d different words".format(mins, v.wordCount, v.vocabulary().size)
+        }
+        addView(ui.body(state), ui.fill(8))
         val row = ui.row()
         row.addView(ui.button("🎙 Record", Ui.Kind.PRIMARY) { record(v) }, ui.wrap())
         row.addView(ui.button("📂 Import") { importTarget = v; pickFile.launch("audio/*") }, ui.wrap())
@@ -172,32 +181,64 @@ class VoicesTab(private val a: MainActivity) {
         }
     }
 
-    /** Split into utterances, recognize each, align and store. */
+    /**
+     * Mimic-first learning: store the speech and build the sound pool, which is everything
+     * frame mimicry needs — the voice can speak within seconds. What was said (for stitching
+     * mode and "Check words") is worked out afterwards in the background.
+     */
     private fun learn(v: VoiceBank, audio: FloatArray) {
         a.setStatus("Learning ${v.name}'s voice…")
         a.work({
             val segs = Segmenter.split(audio)
-            var learned = 0
-            segs.forEachIndexed { i, s ->
-                a.main.post { a.setStatus("Learning ${v.name}'s voice… ${i + 1}/${segs.size}") }
+            var n = 0
+            for (s in segs) {
                 val piece = audio.copyOfRange(s[0], s[1])
-                // one bad stretch (too long for the reference reader, pure noise) skips, not aborts
-                try {
-                    val words = a.engine.recognizer().words(piece)
-                    if (words.isNotEmpty()) {
-                        val r = VoiceBank.capture("r" + System.nanoTime(), piece, words, 0.9, a.engine.aligner)
-                        if (r.words.isNotEmpty()) { v.add(r); v.saveRecording(r); learned += r.words.size }
-                    }
-                } catch (e: Throwable) { /* skip this stretch */ }
+                if (piece.size < Dsp.SR / 2) continue
+                val r = com.kenku.mimic.engine.Recording("r" + System.nanoTime(), piece, "", emptyList())
+                v.add(r); v.saveRecording(r); n++
             }
-            learned
+            if (n > 0) {
+                v.hintStats(audio)
+                a.engine.pool(v)                       // the voice can mimic the moment this returns
+            }
+            n
         }) { r ->
             a.setStatus(null)
             r.onSuccess { n ->
-                a.toast(if (n == 0) "I couldn't make out any words. Try somewhere quieter." else "Learned $n words. Tap “Check words” to fix any I misheard.")
+                a.toast(if (n == 0) "That was too short or too quiet." else "${v.name} can speak now. Learning their words in the background…")
                 refresh()
-                if (n > 0) a.work({ a.engine.pool(v) }) {}   // build the mimicry pool now, not on the first line
+                if (n > 0) polish(v)
             }.onFailure { a.toast("Something went wrong: ${it.message}") }
+        }
+    }
+
+    // ---------- background word-learning (recognize + align, one recording at a time) ----------
+
+    private val polishing = HashSet<String>()           // voices being worked through
+    private val polishTried = HashSet<String>()         // recordings that yielded no words this session
+
+    /** Work out word positions for any recording that lacks them, without blocking speech. */
+    fun polish(v: VoiceBank) {
+        if (!polishing.add(v.dir.name)) return
+        polishNext(v)
+    }
+
+    private fun polishNext(v: VoiceBank) {
+        val r = if (v in a.engine.voices) v.recs.firstOrNull { it.words.isEmpty() && it.id !in polishTried } else null
+        if (r == null) { polishing.remove(v.dir.name); refresh(); return }
+        a.work({
+            // shipped starter voices carry exact transcripts; recorded voices get the recognizer
+            val typed = r.transcript.isNotBlank()
+            val words = if (typed) TextNorm.words(r.transcript) else a.engine.recognizer().words(r.audio)
+            if (words.isEmpty()) null
+            else VoiceBank.capture(r.id, r.audio, words, if (typed) 1.0 else 0.9, a.engine.aligner)
+        }) { res ->
+            polishTried.add(r.id)
+            res.onSuccess { nr ->
+                if (nr != null && nr.words.isNotEmpty()) { v.remove(r.id); v.add(nr); v.saveRecording(nr) }
+            }
+            if (view.visibility == android.view.View.VISIBLE) refresh()   // live word-learning progress on the cards
+            polishNext(v)
         }
     }
 
@@ -209,7 +250,8 @@ class VoicesTab(private val a: MainActivity) {
         if (v.recs.isEmpty()) col.addView(ui.body("Nothing recorded yet."))
         for (r in v.recs.toList()) {
             val row = ui.card()
-            row.addView(ui.body(r.transcript.lowercase(), 15f, R.color.ink), ui.fill(6))
+            val shown = if (r.words.isEmpty() && r.transcript.isBlank()) "🪶 (still working out these words…)" else r.transcript.lowercase()
+            row.addView(ui.body(shown, 15f, R.color.ink), ui.fill(6))
             val btns = ui.row()
             btns.addView(ui.button("▶") { AudioIO.play(r.audio) }, ui.wrap())
             btns.addView(ui.button("Fix words") { dlg.dismiss(); fix(v, r) }, ui.wrap())

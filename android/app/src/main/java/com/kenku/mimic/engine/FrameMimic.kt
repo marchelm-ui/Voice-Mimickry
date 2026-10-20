@@ -31,12 +31,33 @@ class FrameMimic(dir: File) {
 
     companion object { const val DIM = 1024; const val TOPK = 4 }
 
-    /** Speech features of 24 kHz audio: N x 1024, row-major. */
-    @Synchronized
+    /**
+     * Speech features of 24 kHz audio: N x 1024, row-major. Long audio is encoded in 10-second
+     * windows with half a second of context — the transformer's attention cost grows with the
+     * square of the window, so this is ~10x faster on a 3-minute recording and the frames are
+     * the same to within the overlap.
+     */
     fun features(audio24: FloatArray): FloatArray {
         val x = Dsp.resample(audio24, Dsp.SR, 16000)
         if (x.size < 1600) return FloatArray(0)
-        val t = OnnxTensor.createTensor(env, FloatBuffer.wrap(x), longArrayOf(1, x.size.toLong()))
+        val win = 16000 * 10
+        val ov = 16000 / 2
+        if (x.size <= win + ov) return encode(x)
+        val parts = ArrayList<FloatArray>()
+        var s = 0
+        while (s < x.size) {
+            val from = if (s == 0) 0 else s - ov
+            val seg = encode(x.copyOfRange(from, min(x.size, s + win)))
+            val drop = if (s == 0) 0 else (ov / 320) * DIM           // frames that belong to the previous window
+            if (seg.size > drop) parts += seg.copyOfRange(drop, seg.size)
+            s += win
+        }
+        return Dsp.concat(parts)
+    }
+
+    @Synchronized
+    private fun encode(x16: FloatArray): FloatArray {
+        val t = OnnxTensor.createTensor(env, FloatBuffer.wrap(x16), longArrayOf(1, x16.size.toLong()))
         val r = encoder.run(mapOf("wav" to t))
         @Suppress("UNCHECKED_CAST")
         val rows = r[0].value as Array<FloatArray>
@@ -52,19 +73,16 @@ class FrameMimic(dir: File) {
         val norms = FloatArray(n) { i -> var s = 0f; for (k in 0 until DIM) { val v = feats[i * DIM + k]; s += v * v }; sqrt(s) + 1e-6f }
     }
 
-    fun pool(recordings: List<FloatArray>): Pool {
-        return Pool(Dsp.concat(recordings.map { features(it) }))
-    }
 
-    fun savePool(p: Pool, f: File) {
-        val bb = ByteBuffer.allocate(p.feats.size * 2).order(ByteOrder.LITTLE_ENDIAN)
-        for (v in p.feats) bb.putShort(android.util.Half.toHalf(v))
+    fun saveFeats(feats: FloatArray, f: File) {
+        val bb = ByteBuffer.allocate(feats.size * 2).order(ByteOrder.LITTLE_ENDIAN)
+        for (v in feats) bb.putShort(android.util.Half.toHalf(v))
         f.writeBytes(bb.array())
     }
 
-    fun loadPool(f: File): Pool {
+    fun loadFeats(f: File): FloatArray {
         val sb = ByteBuffer.wrap(f.readBytes()).order(ByteOrder.LITTLE_ENDIAN).asShortBuffer()
-        return Pool(FloatArray(sb.remaining()) { android.util.Half.toFloat(sb.get(it)) })
+        return FloatArray(sb.remaining()) { android.util.Half.toFloat(sb.get(it)) }
     }
 
     /** Re-voice [source24] (any natural reading of the line) with [pool]'s sounds. */

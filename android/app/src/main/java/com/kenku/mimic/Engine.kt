@@ -74,10 +74,17 @@ class Engine private constructor(private val ctx: Context) {
         val m = mimic() ?: return null
         val key = "${v.dir.name}-${v.recs.size}-${v.recs.joinToString("|") { it.id }.hashCode()}"
         pools[key]?.let { return it }
-        val f = File(v.dir, "pool-$key.f16")
-        val p = if (f.exists()) m.loadPool(f) else m.pool(v.recs.map { r ->
-            if (r.words.isEmpty()) r.audio else r.audio.copyOfRange(r.words.first().s, r.words.last().e)
-        }).also { v.dir.listFiles { x -> x.name.startsWith("pool-") }?.forEach { it.delete() }; m.savePool(it, f) }
+        // one feature file per recording: adding a recording encodes only the new one
+        val parts = v.recs.map { r ->
+            val f = File(v.dir, "feat-${r.id}.f16")
+            if (f.exists()) m.loadFeats(f) else m.features(
+                if (r.words.isEmpty()) r.audio else r.audio.copyOfRange(r.words.first().s, r.words.last().e)
+            ).also { feats -> m.saveFeats(feats, f) }
+        }
+        val keep = v.recs.map { "feat-${it.id}.f16" }.toSet()
+        v.dir.listFiles { x -> (x.name.startsWith("feat-") && x.name !in keep) || x.name.startsWith("pool-") }
+            ?.forEach { it.delete() }
+        val p = FrameMimic.Pool(com.kenku.mimic.engine.Dsp.concat(parts))
         pools.keys.removeAll { it.startsWith(v.dir.name + "-") }   // drop this voice's stale pools
         pools[key] = p
         return p
@@ -110,21 +117,28 @@ class Engine private constructor(private val ctx: Context) {
         }
     } catch (e: Throwable) { emptyList() }
 
-    /** Learn a starter voice from its shipped recordings; exact transcripts, so no mishearing. */
+    /**
+     * Add a starter voice fast: store its recordings and build the mimicry pool, which is all
+     * frame mimicry needs — the exact word positions (for stitching mode) are learned in the
+     * background afterwards from the shipped transcripts.
+     */
     fun installPreset(p: Preset, progress: (String) -> Unit): VoiceBank {
         val meta = org.json.JSONObject(ctx.assets.open("presets/${p.id}/voice.json").bufferedReader().readText())
         val utts = meta.getJSONArray("utts")
         val v = newVoice(p.name)
         try {
+            val sample = ArrayList<FloatArray>()
             for (i in 0 until utts.length()) {
-                progress("Learning ${p.name}… ${i + 1}/${utts.length()}")
+                progress("Adding ${p.name}… ${i + 1}/${utts.length()}")
                 val u = utts.getJSONObject(i)
                 val audio = AudioIO.readWavAsset(ctx, "presets/${p.id}/${u.getString("wav")}")
-                val words = com.kenku.mimic.engine.TextNorm.words(u.getString("text"))
-                if (words.isEmpty()) continue
-                val r = VoiceBank.capture("p${p.id}$i", audio, words, 1.0, aligner)
-                if (r.words.isNotEmpty()) { v.add(r); v.saveRecording(r) }
+                val r = com.kenku.mimic.engine.Recording("p${p.id}$i", audio, u.getString("text"), emptyList())
+                v.add(r); v.saveRecording(r)
+                if (sample.sumOf { it.size } < com.kenku.mimic.engine.Dsp.SR * 20) sample += audio
             }
+            v.hintStats(com.kenku.mimic.engine.Dsp.concat(sample))
+            progress("Learning ${p.name}'s sounds…")
+            pool(v)
         } catch (e: Throwable) {
             deleteVoice(v)
             throw e

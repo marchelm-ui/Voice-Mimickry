@@ -54,10 +54,21 @@ class VoiceBank(val dir: File, var name: String) {
     }
 
     private fun refreshStats() {
+        // keep hints measured from raw audio until word-level stats exist (mimic-first learning)
         val f0s = recs.flatMap { r -> r.words.filter { it.f0Mean > 0 }.map { it.f0Mean } }
-        f0Median = Dsp.median(f0s)
+        if (f0s.isNotEmpty()) f0Median = Dsp.median(f0s)
         val ls = recs.flatMap { r -> r.words.map { it.loud } }.sorted()
-        loudMedian = if (ls.isEmpty()) -25.0 else ls[ls.size / 2]
+        if (ls.isNotEmpty()) loudMedian = ls[ls.size / 2]
+    }
+
+    /** Quick voice statistics straight from audio, so a just-recorded voice can speak at once. */
+    fun hintStats(audio: FloatArray) {
+        if (recs.any { it.words.isNotEmpty() }) return
+        val f0 = Dsp.f0(audio)
+        val v = f0.filter { it > 0 }
+        if (v.isNotEmpty()) f0Median = Dsp.median(v)
+        loudMedian = Dsp.loudness(audio)
+        saveMeta()
     }
 
     /** A clean stretch of the voice for the neural clone to copy timbre from. */
@@ -128,6 +139,8 @@ class VoiceBank(val dir: File, var name: String) {
         fun load(dir: File): VoiceBank {
             val meta = JSONObject(File(dir, "voice.json").readText())
             val bank = VoiceBank(dir, meta.getString("name"))
+            bank.f0Median = meta.optDouble("f0", 0.0).toFloat()
+            bank.loudMedian = meta.optDouble("loud", -25.0)
             val ids = meta.getJSONArray("recordings")
             for (i in 0 until ids.length()) {
                 val id = ids.getString(i)
@@ -157,6 +170,7 @@ class VoiceBank(val dir: File, var name: String) {
     fun saveMeta() {
         dir.mkdirs()
         File(dir, "voice.json").writeText(JSONObject().put("name", name)
+            .put("f0", f0Median.toDouble()).put("loud", loudMedian)
             .put("recordings", JSONArray(recs.map { it.id })).toString())
     }
 

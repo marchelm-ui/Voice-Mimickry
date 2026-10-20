@@ -54,7 +54,10 @@ android {
         jvmTarget = "17"
         freeCompilerArgs += listOf("-Xskip-metadata-version-check")
     }
-    testOptions { unitTests.isReturnDefaultValues = true }
+    testOptions {
+        unitTests.isReturnDefaultValues = true
+        unitTests.isIncludeAndroidResources = true     // Robolectric reads the real assets
+    }
 }
 
 dependencies {
@@ -64,4 +67,6 @@ dependencies {
     // onnxruntime Java bindings, same 1.28.2 build sherpa-onnx links against (downloaded by CI)
     implementation(files("libs/onnxruntime-android.aar"))
     testImplementation("junit:junit:4.13.2")
+    testImplementation("org.robolectric:robolectric:4.12.2")
+    testImplementation("androidx.test:core:1.6.1")
 }
