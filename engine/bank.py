@@ -50,21 +50,30 @@ class Recording:
 
 # ---------------------------------------------------------------- speech recognition
 
-def recognize(paths16k):
-    """Run the recognizer on 16 kHz wav files -> list of (text, tokens, token_start_times)."""
-    cmd = [ASR_BIN, f"--tokens={ASR_DIR}/tokens.txt",
-           f"--encoder={ASR_DIR}/encoder-epoch-99-avg-1.int8.onnx",
-           f"--decoder={ASR_DIR}/decoder-epoch-99-avg-1.onnx",
-           f"--joiner={ASR_DIR}/joiner-epoch-99-avg-1.int8.onnx",
-           "--num-threads=2"] + list(paths16k)
-    r = subprocess.run(cmd, capture_output=True, text=True)
-    blob = r.stdout + r.stderr
+def recognize(paths16k, batch=6):
+    """Run the recognizer on 16 kHz wav files -> list of (text, tokens, token_start_times).
+
+    Batched: the recognizer holds every file's attention state at once, so a long list of long
+    readings gets the process OOM-killed (seen with LibriSpeech speaker 422: 28 files, rc -9).
+    """
     out = []
-    for m in re.finditer(r'\{"lang".*?"words": \[[^\]]*\]\}', blob, re.S):
-        j = json.loads(m.group(0))
-        out.append((j["text"], j["tokens"], j["timestamps"], j.get("ys_log_probs", [])))
-    if len(out) != len(paths16k):
-        raise RuntimeError(f"ASR returned {len(out)} results for {len(paths16k)} files")
+    paths16k = list(paths16k)
+    for s in range(0, len(paths16k), batch):
+        chunk = paths16k[s:s + batch]
+        cmd = [ASR_BIN, f"--tokens={ASR_DIR}/tokens.txt",
+               f"--encoder={ASR_DIR}/encoder-epoch-99-avg-1.int8.onnx",
+               f"--decoder={ASR_DIR}/decoder-epoch-99-avg-1.onnx",
+               f"--joiner={ASR_DIR}/joiner-epoch-99-avg-1.int8.onnx",
+               "--num-threads=2"] + chunk
+        r = subprocess.run(cmd, capture_output=True, text=True)
+        blob = r.stdout + r.stderr
+        got = []
+        for m in re.finditer(r'\{"lang".*?"words": \[[^\]]*\]\}', blob, re.S):
+            j = json.loads(m.group(0))
+            got.append((j["text"], j["tokens"], j["timestamps"], j.get("ys_log_probs", [])))
+        if len(got) != len(chunk):
+            raise RuntimeError(f"ASR returned {len(got)} results for {len(chunk)} files (rc {r.returncode})")
+        out += got
     return out
 
 
