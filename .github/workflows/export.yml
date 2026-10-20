@@ -34,7 +34,7 @@ jobs:
           gh release delete knnvc-models -y --cleanup-tag 2>/dev/null || true
           gh release create knnvc-models --title "Phone models: kNN-VC (WavLM 6-layer + HiFi-GAN)" \
             --notes "$(cat export-log.txt | tail -12)" models/wavlm6.fp16.onnx models/hifigan.fp16.onnx \
-            models/wavlm6.int8.onnx models/hifigan.int8.onnx models/hifigan.onnx export-log.txt
+            models/wavlm6.int8.onnx models/hifigan.int8.onnx models/hifigan.onnx models/wavlm6.onnx export-log.txt
       - name: Save the log if it failed
         if: failure() || cancelled()
         run: |
