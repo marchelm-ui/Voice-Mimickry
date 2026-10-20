@@ -84,8 +84,10 @@ class Engine private constructor(private val ctx: Context) {
     fun sayMimic(v: VoiceBank, line: String): FloatArray? {
         val m = mimic() ?: return null
         val p = pool(v) ?: return null
-        val source = try { neural()?.say(line, v.referenceClip()) } catch (e: Throwable) { null }
-            ?: ref.read(com.kenku.mimic.engine.TextNorm.words(line), if (v.f0Median > 165) 2 else 11).audio
+        // the stock reading guides better than a clone reading (benchmark: 6.2% vs 6.9% misheard,
+        // 0.74 vs 0.69 similarity) — every sound is replaced anyway, the guide only sets the flow
+        val source = try { ref.read(com.kenku.mimic.engine.TextNorm.words(line), if (v.f0Median > 165) 2 else 11).audio }
+            catch (e: Throwable) { neural()?.say(line, v.referenceClip()) ?: return null }
         return m.convert(source, p, v.loudMedian)
     }
 
