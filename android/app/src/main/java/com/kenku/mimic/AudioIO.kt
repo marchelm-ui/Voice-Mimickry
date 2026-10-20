@@ -83,10 +83,7 @@ object AudioIO {
         fun stop(): FloatArray {
             running = false
             thread?.join(2000)
-            val all = synchronized(chunks) { chunks.toList() }
-            val x = FloatArray(all.sumOf { it.size })
-            var p = 0
-            for (c in all) { System.arraycopy(c, 0, x, p, c.size); p += c.size }
+            val x = Dsp.concat(synchronized(chunks) { chunks.toList() })
             return Dsp.resample(x, rate, Dsp.SR)
         }
     }

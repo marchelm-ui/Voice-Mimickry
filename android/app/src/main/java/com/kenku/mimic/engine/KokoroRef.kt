@@ -24,7 +24,7 @@ class KokoroRef(dir: File) {
     private val voiceRows: Int
 
     init {
-        val opts = OrtSession.SessionOptions().apply { setIntraOpNumThreads(threads()) }
+        val opts = OrtSession.SessionOptions().apply { setIntraOpNumThreads(Dsp.threads()) }
         session = env.createSession(File(dir, MODEL).absolutePath, opts)
         File(dir, "tokens.txt").forEachLine { line ->
             val i = line.lastIndexOf(' ')
@@ -97,7 +97,6 @@ class KokoroRef(dir: File) {
         const val MODEL = "model.int8.onnx"
         const val NUM_VOICES = 54
         const val FEMALE_A = 2; const val FEMALE_B = 9; const val MALE_A = 11; const val MALE_B = 13
-        private fun threads() = Runtime.getRuntime().availableProcessors().let { if (it >= 8) 4 else 2 }
         private val LETTER = mapOf('a' to "æ", 'b' to "b", 'c' to "k", 'd' to "d", 'e' to "ɛ", 'f' to "f", 'g' to "ɡ",
             'h' to "h", 'i' to "ɪ", 'j' to "ʤ", 'k' to "k", 'l' to "l", 'm' to "m", 'n' to "n", 'o' to "ɑ", 'p' to "p",
             'q' to "k", 'r' to "ɹ", 's' to "s", 't' to "t", 'u' to "ʌ", 'v' to "v", 'w' to "w", 'x' to "ks", 'y' to "j", 'z' to "z")

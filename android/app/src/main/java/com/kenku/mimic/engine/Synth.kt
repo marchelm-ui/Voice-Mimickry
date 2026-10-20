@@ -336,9 +336,7 @@ class Synth(private val ref: KokoroRef, private val aligner: Aligner, private va
             val gap = if (pi < phrases.size - 1) PAUSE_S[end] ?: 0.3 else 0.15
             pieces += if (o.roomTone) Dsp.roomTone(toneSrc, gap, pi) else FloatArray((gap * Dsp.SR).toInt())
         }
-        var out = FloatArray(pieces.sumOf { it.size })
-        var p = 0
-        for (x in pieces) { System.arraycopy(x, 0, out, p, x.size); p += x.size }
+        var out = Dsp.concat(pieces)
         val peak = out.maxOfOrNull { abs(it) } ?: 0f
         if (peak > 0.95f) out = Dsp.scale(out, 0.95 / peak)
         return out to Report(sources, seams)

@@ -67,12 +67,7 @@ object SfxDsp {
         if (abs(x) < 0.85f) x else (tanh(x.toDouble() * 1.1) / tanh(1.1)).toFloat().coerceIn(-0.98f, 0.98f)
 
     fun fadeEdges(src: FloatArray, ms: Int = 6): FloatArray {
-        val n = minOf(Dsp.SR * ms / 1000, src.size / 2)
-        for (i in 0 until n) {
-            val g = i.toFloat() / n
-            src[i] *= g
-            src[src.size - 1 - i] *= g
-        }
+        Dsp.fadeEdges(src, Dsp.SR * ms / 1000)
         return src
     }
 

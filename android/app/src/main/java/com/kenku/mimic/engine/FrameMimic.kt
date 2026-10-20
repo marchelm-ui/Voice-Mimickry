@@ -23,7 +23,7 @@ import kotlin.math.sqrt
 class FrameMimic(dir: File) {
     private val env = OrtEnvironment.getEnvironment()
     private val opts = OrtSession.SessionOptions().apply {
-        setIntraOpNumThreads(Runtime.getRuntime().availableProcessors().let { if (it >= 8) 4 else 2 })
+        setIntraOpNumThreads(Dsp.threads())
     }
     private val encoder = env.createSession(File(dir, "wavlm6.fp16.onnx").absolutePath, opts)
     private val vocoder = env.createSession(File(dir, "hifigan.fp16.onnx").absolutePath, opts)
@@ -53,11 +53,7 @@ class FrameMimic(dir: File) {
     }
 
     fun pool(recordings: List<FloatArray>): Pool {
-        val parts = recordings.map { features(it) }
-        val all = FloatArray(parts.sumOf { it.size })
-        var p = 0
-        for (f in parts) { System.arraycopy(f, 0, all, p, f.size); p += f.size }
-        return Pool(all)
+        return Pool(Dsp.concat(recordings.map { features(it) }))
     }
 
     fun savePool(p: Pool, f: File) {

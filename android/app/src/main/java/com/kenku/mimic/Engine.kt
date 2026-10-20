@@ -133,6 +133,15 @@ class Engine private constructor(private val ctx: Context) {
         return v
     }
 
+    /** "Just say it well": frame mimicry first, word stitching as the fallback. */
+    fun sayBest(v: VoiceBank, text: String, opts: Synth.Opts = Synth.Opts()): Pair<FloatArray, Synth.Report> {
+        val x = sayMimic(v, text)
+        if (x != null && x.isNotEmpty()) {
+            return x to Synth.Report(com.kenku.mimic.engine.TextNorm.words(text).map { it to Synth.Source.NEURAL }, 0)
+        }
+        return synth.speak(v, text, opts)
+    }
+
     fun newVoice(name: String): VoiceBank {
         val id = "v" + System.currentTimeMillis()
         val v = VoiceBank(File(voicesDir, id), name)

@@ -24,6 +24,17 @@ object Dsp {
 
     // ------------------------------------------------------------ basics
 
+    /** How many cores heavy models should use: the big cores, not every little one. */
+    fun threads() = Runtime.getRuntime().availableProcessors().let { if (it >= 8) 4 else 2 }
+
+    /** One array from many, in order. */
+    fun concat(parts: List<FloatArray>): FloatArray {
+        val out = FloatArray(parts.sumOf { it.size })
+        var p = 0
+        for (c in parts) { System.arraycopy(c, 0, out, p, c.size); p += c.size }
+        return out
+    }
+
     fun resample(x: FloatArray, src: Int, dst: Int): FloatArray {
         if (src == dst || x.isEmpty()) return x.copyOf()
         // windowed-sinc resampler (good enough for 16/22.05/44.1/48 kHz -> 24 kHz)

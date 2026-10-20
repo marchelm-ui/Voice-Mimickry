@@ -12,8 +12,6 @@ import com.k2fsa.sherpa.onnx.OfflineTtsModelConfig
 import com.k2fsa.sherpa.onnx.OfflineTtsPocketModelConfig
 import java.io.File
 
-private fun threads() = Runtime.getRuntime().availableProcessors().let { if (it >= 8) 4 else 2 }
-
 /** On-device speech recognition (Zipformer transducer via sherpa-onnx): what was said. */
 class Recognizer(dir: File) {
     private val rec = OfflineRecognizer(
@@ -27,7 +25,7 @@ class Recognizer(dir: File) {
                     joiner = File(dir, "joiner.int8.onnx").absolutePath,
                 ),
                 tokens = File(dir, "tokens.txt").absolutePath,
-                numThreads = threads(),
+                numThreads = Dsp.threads(),
                 modelType = "transducer",
             ),
         ),
@@ -63,7 +61,7 @@ class NeuralClone(dir: File) {
                     vocabJson = File(dir, "vocab.json").absolutePath,
                     tokenScoresJson = File(dir, "token_scores.json").absolutePath,
                 ),
-                numThreads = threads(),
+                numThreads = Dsp.threads(),
                 provider = "cpu",
             ),
         ),

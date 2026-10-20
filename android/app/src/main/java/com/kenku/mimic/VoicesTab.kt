@@ -104,10 +104,7 @@ class VoicesTab(private val a: MainActivity) {
         testing = true
         a.setStatus("Mimicking ${v.name}…")
         val line = listOf("Well met, traveler.", "Who goes there?", "The guards are here!", "Shiny. Want the shiny.").random()
-        a.work({
-            a.engine.sayMimic(v, line)
-                ?: a.engine.synth.speak(v, line, com.kenku.mimic.engine.Synth.Opts()).first
-        }) { r ->
+        a.work({ a.engine.sayBest(v, line).first }) { r ->
             testing = false
             a.setStatus(null)
             r.onSuccess { AudioIO.play(it) }.onFailure { a.toast("Couldn't test that voice: ${it.message}") }

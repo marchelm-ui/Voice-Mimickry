@@ -284,11 +284,7 @@ class SpeakTab(private val a: MainActivity) {
                 else held = y
             }
             fun speak(chunk: String, speaker: com.kenku.mimic.engine.VoiceBank): Pair<FloatArray, Synth.Report> =
-                if (how == "mimic") {
-                    val x = a.engine.sayMimic(speaker, chunk)
-                    if (x != null && x.isNotEmpty()) x to Synth.Report(com.kenku.mimic.engine.TextNorm.words(chunk).map { it to Synth.Source.NEURAL }, 0)
-                    else a.engine.synth.speak(speaker, chunk, opts)
-                } else a.engine.synth.speak(speaker, chunk, opts)
+                if (how == "mimic") a.engine.sayBest(speaker, chunk, opts) else a.engine.synth.speak(speaker, chunk, opts)
             for (m in Regex("\\[([^\\]]+)\\]|[^\\[]+").findAll(text)) {
                 val tag = m.groups[1]?.value
                 if (tag != null) {
@@ -331,9 +327,7 @@ class SpeakTab(private val a: MainActivity) {
             val tail = fx.tail()
             if (tail.isNotEmpty()) push(tail)
             player.finish()
-            val audio = FloatArray(pieces.sumOf { it.size })
-            var p = 0
-            for (c in pieces) { System.arraycopy(c, 0, audio, p, c.size); p += c.size }
+            val audio = com.kenku.mimic.engine.Dsp.concat(pieces)
             audio to Synth.Report(if (spoke) words else com.kenku.mimic.engine.TextNorm.words(text).map { it to Synth.Source.NEURAL }, seams)
         }) { r ->
             speaking = false
