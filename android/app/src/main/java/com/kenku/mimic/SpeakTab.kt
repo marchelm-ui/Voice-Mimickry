@@ -46,6 +46,25 @@ class SpeakTab(private val a: MainActivity) {
     private val history = ui.column()
     private class Line(val text: String, val voice: String, val audio: FloatArray, val shown: CharSequence, var pinId: String? = null)
     private val lines = ArrayList<Line>()
+    private class OldLine(val text: String, val voice: String)
+    private val oldLines = ArrayList<OldLine>()          // lines from earlier sessions: text only
+
+    private fun loadOldLines() {
+        try {
+            val arr = org.json.JSONArray(a.prefs.getString("history", "[]"))
+            for (i in 0 until arr.length()) {
+                val o = arr.getJSONObject(i)
+                oldLines += OldLine(o.getString("t"), o.getString("v"))
+            }
+        } catch (e: Throwable) { /* no history yet */ }
+    }
+
+    private fun saveHistory() {
+        val arr = org.json.JSONArray()
+        for (l in lines) arr.put(org.json.JSONObject().put("t", l.text).put("v", l.voice))
+        for (o in oldLines.take(30 - lines.size)) arr.put(org.json.JSONObject().put("t", o.text).put("v", o.voice))
+        a.prefs.edit().putString("history", arr.toString()).apply()
+    }
 
     /** A pinned line: kept on disk so quick lines survive restarts. */
     private class Pin(val id: String, val text: String, val voice: String)
@@ -116,7 +135,8 @@ class SpeakTab(private val a: MainActivity) {
             addView(history)
         })
         loadPins()
-        a.main.post { renderQuick() }
+        loadOldLines()
+        a.main.post { renderQuick(); drawHistory() }
     }
 
     /** Insert text (a [sound tag] or phrase) at the cursor. */
@@ -269,6 +289,8 @@ class SpeakTab(private val a: MainActivity) {
                 legend.text = summary(rep)
                 lines.add(0, Line(text, v.name, audio, shown))
                 if (lines.size > 30) lines.removeAt(lines.size - 1)
+                oldLines.removeAll { it.text == text }
+                saveHistory()
                 drawHistory()
             }.onFailure { player.cancel(); a.toast("Couldn't say that: ${it.message}") }
         }
@@ -309,6 +331,18 @@ class SpeakTab(private val a: MainActivity) {
             row.addView(ui.button(if (l.pinId == null) "⚡ Pin" else "Unpin") { l.pinId?.let { unpin(it) } ?: pin(l) }, ui.wrap())
             row.addView(ui.button("Edit") { input.setText(l.text); input.setSelection(l.text.length) }, ui.wrap())
             row.addView(ui.button("Share", Ui.Kind.QUIET) { share(l) }, ui.wrap())
+            c.addView(row)
+            history.addView(c, ui.fill(8))
+        }
+        // lines from earlier sessions: the text survives, the sound is one tap away
+        for (o in oldLines) {
+            if (lines.any { it.text == o.text }) continue
+            val c = ui.card()
+            c.addView(TextView(a).apply { text = o.text.lowercase(); textSize = 15f; setTextColor(ui.c(R.color.muted)) })
+            c.addView(ui.body("as ${o.voice} · from last time", 12f), ui.fill(6))
+            val row = ui.row()
+            row.addView(ui.button("🦜 Say again") { input.setText(o.text); input.setSelection(o.text.length); say() }, ui.wrap())
+            row.addView(ui.button("Edit", Ui.Kind.QUIET) { input.setText(o.text); input.setSelection(o.text.length) }, ui.wrap())
             c.addView(row)
             history.addView(c, ui.fill(8))
         }
