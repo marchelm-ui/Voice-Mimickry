@@ -35,6 +35,22 @@ marked **[engine]** are built into Voice Mimickry; **[app]** are planned for the
 These come from Voice Mimickry's own benchmarks and a blind listening test, and they reorder
 some of the list above.
 
+- **Frame-level mimicry beats word stitching on every measure.** Rebuilding a reference reading
+  frame by frame from the person's recordings (kNN-VC: WavLM layer-6 features, 4-NN cosine,
+  HiFi-GAN) scored 6.2% misheard / 0.736 speaker similarity across 7 voices, vs 32.9% / 0.547
+  for unit-selection stitching. It also solves the small-bank problem: every sound exists in
+  any few minutes of speech, where whole words mostly don't.
+- **The guide reading matters less than expected — and stock beats clone.** Guiding the
+  conversion with the neutral Kokoro reader beat guiding with a Pocket clone of the target
+  voice (6.2% vs 6.9% misheard, 0.736 vs 0.691 similarity). Every frame gets replaced anyway;
+  a cleaner, more intelligible guide survives conversion better than a voice-matched one.
+- **int8 ruins a feature encoder that fp16 preserves.** Dynamic-int8 WavLM features matched
+  fp32 at only 0.86 cosine (0.37 without per-channel weights) — and those features are the
+  kNN search keys. fp16 matched at 0.99999 for half the fp32 size. Quantize vocoders, not
+  the features you search with.
+- **fp16 ONNX needs ARM.** onnxruntime emulates fp16 on x64, turning a seconds-long check into
+  40+ minutes of CI hang; converting with `disable_shape_infer=True` is also mandatory on
+  big models, where whole-graph shape inference itself runs for the better part of an hour.
 - **Human ears beat metrics.** In a blind A/B test the neural clone sounded more human than the word-stitching engine 6 of 6 times, and "sounds like the person" was a 3-3 tie, while the speaker-similarity metric scored the stitched voice far higher (0.71-0.81 vs 0.37). Speaker-embedding similarity rewards real recorded sound but can't hear unnatural seams or melody.
 - **Stitched words are hard to understand when the bank is small.** With 3.5 minutes of a real reader, a recognizer misheard 65% of words in new sentences (vs 8% for a neural clone), mostly because new sentences need many words she never said.
 - **Neighbouring-word fragments were the #1 cause of garbled words.** Ending each word at the first matching moment and starting the next at the last cut misheard words from 79% to about 23%.

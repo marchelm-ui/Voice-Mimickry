@@ -2,11 +2,21 @@
 
 A voice engine for playing a **kenku** in D&D, built from scratch and running entirely on an
 Android phone. A kenku can only speak with sounds it has heard, so this engine does the same:
-it listens to people talk, remembers every word in their real voice, and says new lines by
-stitching those real recordings together, then reshapes pitch and timing so the new sentence
-sounds naturally spoken.
+it listens to people talk, remembers their real voice, and says new lines using only sounds
+from those recordings.
 
-## How it works
+The app speaks two ways, and you pick per line:
+
+- **Every sound (smooth)** — the default. A reference reading of the line is rebuilt frame by
+  frame (every 20 ms) from the closest-sounding moments of the person's real recordings
+  (kNN voice conversion: WavLM features matched by cosine, HiFi-GAN vocoder). On 7 real test
+  voices this was almost as intelligible as the person's own recording (6.2% vs 4.7% misheard
+  words) with by far the highest speaker similarity of any system tested.
+- **Their exact words** — word stitching: whole words cut from the real recordings, joined and
+  reshaped (unit selection + PSOLA). Keeps genuinely real words intact — the truest kenku —
+  but reads as rougher and harder to understand (32.9% misheard).
+
+## How word stitching works
 
 1. **Listen.** Record someone talking (with their permission) or import an audio file. The
    recording is split at pauses and an on-device recognizer works out what was said. You can
@@ -43,20 +53,32 @@ asked). Built for 64-bit ARM phones such as Pixels.
 
 ## Benchmark
 
-See the `eval-results` branch for the latest scores (`SUMMARY.txt`). Columns: word error rate
-when a recognizer listens (lower is better), speaker similarity to the real voice (higher is
-better), predicted audio quality, seam glitchiness relative to real speech (1.0 = as smooth),
-spectral distance and pitch-contour match against the real person saying the same line.
+Latest full run (7 voices: 4 real LibriSpeech speakers, LJSpeech, 2 synthetic stand-ins;
+15 lines each; full table on the `eval-results` branch, `SUMMARY.txt`):
 
-Honest limits: the stand-in "people" are synthetic voices, which makes alignment easier than
-with real recordings; a home-built engine without GPU training does not beat top neural
-systems on arbitrary new sentences; and quality depends on how much of a person's speech the
-kenku has heard.
+| system | misheard words | speaker similarity | predicted quality | pitch-contour match |
+|---|---|---|---|---|
+| the real person | 4.7% | 0.873 | 3.21 | 1.00 |
+| **this app — every sound** | **6.2%** | **0.736** | **3.16** | **0.57** |
+| this app — exact words | 32.9% | 0.547 | 2.65 | 0.43 |
+| Pocket TTS voice clone | 7.5% | 0.386 | 2.99 | 0.33 |
+| ElevenLabs (stock voice) | 3.1% | 0.181 | 3.08 | 0.24 |
+
+Columns: word error rate when a recognizer listens (lower is better), speaker similarity to
+the real voice (higher is better), predicted audio quality (DNSMOS), and pitch-contour match
+against the real person saying the same line.
+
+Honest limits: ElevenLabs was scored on a stock voice, not a clone of the test speaker, so its
+similarity is a floor, not a fair comparison; a home-built engine without GPU training does
+not beat top neural systems on arbitrary new sentences; and quality depends on how much of a
+person's speech the kenku has heard.
 
 ## Credits and licenses
 
-- Kokoro-82M by hexgrad (Apache-2.0): reference reader for alignment and prosody
+- Kokoro-82M by hexgrad (Apache-2.0): reference reader for alignment, prosody and the mimic guide
+- kNN-VC by Baas, van Niekerk, Kamper (MIT): WavLM-Large encoder + prematched HiFi-GAN, exported
+  to fp16 ONNX for the phone
 - Zipformer English recognizer, sherpa-onnx by k2-fsa (Apache-2.0)
-- Pocket TTS by Kyutai, ONNX export via sherpa-onnx (non-commercial license): last-resort fallback
+- Pocket TTS by Kyutai, ONNX export via sherpa-onnx (non-commercial license): fallback reader
 - onnxruntime by Microsoft (MIT)
 - Benchmark only: WeSpeaker ResNet34 speaker model, Microsoft DNSMOS
