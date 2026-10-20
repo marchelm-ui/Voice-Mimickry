@@ -1,0 +1,45 @@
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.7/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :app:buildKotlinToolingMetadata
+> Task :app:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preReleaseBuild UP-TO-DATE
+> Task :app:generateReleaseResValues
+> Task :app:checkReleaseAarMetadata
+> Task :app:mapReleaseSourceSetPaths
+> Task :app:generateReleaseResources
+> Task :app:packageReleaseResources
+> Task :app:mergeReleaseResources
+> Task :app:createReleaseCompatibleScreenManifests
+> Task :app:extractDeepLinksRelease
+> Task :app:parseReleaseLocalResources
+> Task :app:processReleaseMainManifest
+> Task :app:processReleaseManifest
+> Task :app:processReleaseManifestForPackage
+> Task :app:javaPreCompileRelease
+> Task :app:preReleaseUnitTestBuild UP-TO-DATE
+> Task :app:javaPreCompileReleaseUnitTest
+> Task :app:processReleaseResources
+
+> Task :app:compileReleaseKotlin FAILED
+e: file:///home/runner/work/Voice-Mimickry/Voice-Mimickry/android/app/src/main/java/com/kenku/mimic/SpeakTab.kt:246:23 Unsupported [Collection literals outside of annotations].
+e: file:///home/runner/work/Voice-Mimickry/Voice-Mimickry/android/app/src/main/java/com/kenku/mimic/SpeakTab.kt:314:47 No 'get' operator method providing array access.
+e: file:///home/runner/work/Voice-Mimickry/Voice-Mimickry/android/app/src/main/java/com/kenku/mimic/SpeakTab.kt:314:62 Unresolved reference 'size'.
+e: file:///home/runner/work/Voice-Mimickry/Voice-Mimickry/android/app/src/main/java/com/kenku/mimic/SpeakTab.kt:315:38 Unresolved reference 'size'.
+gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/__run_2-1792468517713.json
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':app:compileReleaseKotlin'.
+> A failure occurred while executing org.jetbrains.kotlin.compilerRunner.GradleCompilerRunnerWithWorkers$GradleKotlinCompilerWorkAction
+   > Compilation error. See log for more details
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+
+BUILD FAILED in 23s
+17 actionable tasks: 17 executed
