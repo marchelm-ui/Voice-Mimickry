@@ -18,6 +18,7 @@ jobs:
         with:
           python-version: "3.12"
       - name: Export kNN-VC to ONNX
+        timeout-minutes: 20
         run: |
           set -euo pipefail
           pip install -q numpy onnx onnxruntime onnxconverter-common
@@ -35,7 +36,7 @@ jobs:
             --notes "$(cat export-log.txt | tail -12)" models/wavlm6.fp16.onnx models/hifigan.fp16.onnx \
             models/wavlm6.int8.onnx models/hifigan.int8.onnx models/hifigan.onnx export-log.txt
       - name: Save the log if it failed
-        if: failure()
+        if: failure() || cancelled()
         run: |
           cp export-log.txt /tmp/ 2>/dev/null || echo "no log" > /tmp/export-log.txt
           git config user.name build-bot

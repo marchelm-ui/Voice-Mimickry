@@ -5,15 +5,23 @@ Usage: python3 export_knnvc_onnx.py <knn-vc repo dir> <out dir>
 """
 import os
 import sys
+import time
 
 import numpy as np
 import torch
+
+T0 = time.time()
+
+
+def stage(msg):
+    print(f"[{time.time() - T0:7.1f}s] {msg}", flush=True)
 
 repo, out = sys.argv[1:3]
 sys.path.insert(0, repo)
 from hubconf import knn_vc  # noqa: E402
 
 os.makedirs(out, exist_ok=True)
+stage("loading kNN-VC weights")
 m = knn_vc(pretrained=True, progress=False, prematched=True, device="cpu")
 LAYER = 6
 
@@ -52,14 +60,18 @@ print("features", tuple(ref_feats.shape), "wav", tuple(ref_wav.shape))
 
 torch.set_grad_enabled(False)
 ref_feats = ref_feats.clone()
+stage("onnx export encoder")
 torch.onnx.export(enc, (x,), f"{out}/wavlm6.onnx", input_names=["wav"], output_names=["feats"],
                   dynamic_axes={"wav": {1: "T"}, "feats": {0: "N"}}, opset_version=17, dynamo=False)
+stage("onnx export vocoder")
 torch.onnx.export(voc, (ref_feats[None],), f"{out}/hifigan.onnx", input_names=["feats"], output_names=["wav"],
                   dynamic_axes={"feats": {1: "N"}, "wav": {1: "T"}}, opset_version=17, dynamo=False)
 
 from onnxruntime.quantization import QuantType, quantize_dynamic  # noqa: E402
 # per-channel weights keep the transformer accurate; the plain variant scored only 0.37 cosine
+stage("int8 quantize encoder")
 quantize_dynamic(f"{out}/wavlm6.onnx", f"{out}/wavlm6.int8.onnx", weight_type=QuantType.QInt8, per_channel=True, reduce_range=True)
+stage("int8 quantize vocoder")
 quantize_dynamic(f"{out}/hifigan.onnx", f"{out}/hifigan.int8.onnx", weight_type=QuantType.QInt8)
 
 # fp16: half the size, essentially lossless — the phone uses these (int8 cost too much accuracy,
@@ -67,14 +79,20 @@ quantize_dynamic(f"{out}/hifigan.onnx", f"{out}/hifigan.int8.onnx", weight_type=
 import onnx  # noqa: E402
 from onnxconverter_common import float16  # noqa: E402
 for src, dst in [("wavlm6", "wavlm6.fp16"), ("hifigan", "hifigan.fp16")]:
+    stage(f"fp16 convert {src}")
     # WavLM's feature extractor holds a Cast-to-float node the converter mishandles; leaving Cast
-    # (and the norm ops, for accuracy) in fp32 lets the converter add its own boundary casts
+    # (and the norm ops, for accuracy) in fp32 lets the converter add its own boundary casts.
+    # disable_shape_infer: whole-graph shape inference on a 355 MB model takes the better part of
+    # an hour — the converter only wants it for boundary-cast placement, which torch's export
+    # already annotated
     f16 = float16.convert_float_to_float16(
-        onnx.load(f"{out}/{src}.onnx"), keep_io_types=True,
+        onnx.load(f"{out}/{src}.onnx"), keep_io_types=True, disable_shape_infer=True,
         op_block_list=list(float16.DEFAULT_OP_BLOCK_LIST) + ["Cast"])
     onnx.save(f16, f"{out}/{dst}.onnx")
+    stage(f"fp16 saved {dst}")
 
 import onnxruntime as ort  # noqa: E402
+stage("ort checks")
 for name in ["wavlm6.onnx", "wavlm6.int8.onnx"]:
     s = ort.InferenceSession(f"{out}/{name}")
     y = s.run(None, {"wav": x.numpy()})[0]
@@ -91,6 +109,7 @@ for name in ["hifigan.onnx", "hifigan.int8.onnx"]:
 # the x64 runner emulates fp16 (the phone's ARM cores run it natively), so running the fp16 models
 # here takes the better part of an hour; check them at the weight level instead — fp16 conversion
 # is a pure rounding of the fp32 weights, so comparing the stored tensors is the whole story
+stage("fp16 weight check")
 from onnx import numpy_helper  # noqa: E402
 for src, dst in [("wavlm6", "wavlm6.fp16"), ("hifigan", "hifigan.fp16")]:
     a = {t.name: t for t in onnx.load(f"{out}/{src}.onnx").graph.initializer}
