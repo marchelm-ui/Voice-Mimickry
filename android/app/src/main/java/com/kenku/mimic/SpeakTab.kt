@@ -238,6 +238,8 @@ class SpeakTab(private val a: MainActivity) {
         val opts = Synth.Opts(fallback = mode)
         val fxKey = effect
         val rotateKey = rotate
+        val t0 = System.nanoTime()
+        val firstSound = longArrayOf(0L)                           // when the first piece reached the speaker
         val player = AudioIO.openStream()                          // starts sounding at the first finished piece
         a.work({
             val dspSr = Dsp.SR
@@ -255,7 +257,11 @@ class SpeakTab(private val a: MainActivity) {
             var spoke = false
             var held: FloatArray? = null                            // the last piece's tail, kept for a crossfade
             var loudTarget = 0.0
-            fun push(y: FloatArray) { if (y.isNotEmpty()) { pieces += y; player.feed(y) } }
+            fun push(y: FloatArray) {
+                if (y.isEmpty()) return
+                pieces += y; player.feed(y)
+                if (firstSound[0] == 0L) firstSound[0] = System.nanoTime()
+            }
             fun flush() { held?.let { push(fx.process(it)) }; held = null }
             /** A spoken piece. [fluid] crossfades into what came before; otherwise a clean cut. */
             fun emitSpeech(raw: FloatArray, fluid: Boolean) {
@@ -343,7 +349,9 @@ class SpeakTab(private val a: MainActivity) {
             r.onSuccess { (audio, rep) ->
                 val shown = describe(rep)
                 result.text = shown
-                legend.text = summary(rep)
+                val first = if (firstSound[0] > 0) (firstSound[0] - t0) / 1e9 else 0.0
+                val whole = (System.nanoTime() - t0) / 1e9
+                legend.text = "%s\n⏱ first sound %.1f s · whole line %.1f s".format(summary(rep), first, whole)
                 lines.add(0, Line(text, v.name, audio, shown))
                 if (lines.size > 30) lines.removeAt(lines.size - 1)
                 oldLines.removeAll { it.text == text }

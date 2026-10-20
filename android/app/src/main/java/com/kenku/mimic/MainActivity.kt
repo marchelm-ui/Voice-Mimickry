@@ -36,6 +36,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        installCrashCatcher()
         ui = Ui(this)
         engine = Engine.get(this)
         speak = SpeakTab(this)
@@ -114,6 +115,38 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun toast(s: String) = Toast.makeText(this, s, Toast.LENGTH_LONG).show()
+
+    /** If the app ever dies, the next launch offers the report — the loop can't fix what it can't see. */
+    private fun installCrashCatcher() {
+        val crashFile = java.io.File(filesDir, "last-crash.txt")
+        val previous = Thread.getDefaultUncaughtExceptionHandler()
+        Thread.setDefaultUncaughtExceptionHandler { t, e ->
+            try {
+                val ver = try { packageManager.getPackageInfo(packageName, 0).versionName } catch (x: Throwable) { "?" }
+                crashFile.writeText("Voice Mimickry crash · ${android.os.Build.MODEL} · app $ver\n" +
+                    android.util.Log.getStackTraceString(e))
+            } catch (x: Throwable) { /* nothing to be done */ }
+            previous?.uncaughtException(t, e)
+        }
+        if (crashFile.exists()) {
+            val report = try { crashFile.readText() } catch (e: Throwable) { "" }
+            crashFile.delete()
+            if (report.isNotBlank()) {
+                android.app.AlertDialog.Builder(this)
+                    .setTitle("The app crashed last time")
+                    .setMessage("Want to send the crash report so it can be fixed? It holds only the error and your phone model.")
+                    .setPositiveButton("Send") { _, _ ->
+                        startActivity(android.content.Intent.createChooser(android.content.Intent(android.content.Intent.ACTION_SEND).apply {
+                            type = "text/plain"
+                            putExtra(android.content.Intent.EXTRA_SUBJECT, "Voice Mimickry crash report")
+                            putExtra(android.content.Intent.EXTRA_TEXT, report)
+                        }, "Send crash report"))
+                    }
+                    .setNegativeButton("Not now", null)
+                    .show()
+            }
+        }
+    }
 
     /** Run on the engine thread, then deliver the result on screen. */
     fun <T> work(job: () -> T, done: (Result<T>) -> Unit) {
