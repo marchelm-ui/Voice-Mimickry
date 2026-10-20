@@ -65,15 +65,21 @@ class Engine private constructor(private val ctx: Context) {
         return try { FrameMimic(File(ctx.filesDir, "knnvc")).also { mimic = it } } catch (e: Throwable) { mimicFailed = true; null }
     }
 
-    /** The voice's sound inventory for frame mimicry, built once per voice and cached on disk. */
+    /**
+     * The voice's sound inventory for frame mimicry, built once per voice and cached on disk.
+     * The cache key covers WHICH recordings the voice holds, not just how many, so fixing or
+     * swapping a recording rebuilds the pool instead of mimicking from stale sounds.
+     */
     fun pool(v: VoiceBank): FrameMimic.Pool? {
         val m = mimic() ?: return null
-        pools[v.dir.name]?.let { return it }
-        val f = File(v.dir, "pool-${v.recs.size}.f16")
+        val key = "${v.dir.name}-${v.recs.size}-${v.recs.joinToString("|") { it.id }.hashCode()}"
+        pools[key]?.let { return it }
+        val f = File(v.dir, "pool-$key.f16")
         val p = if (f.exists()) m.loadPool(f) else m.pool(v.recs.map { r ->
             if (r.words.isEmpty()) r.audio else r.audio.copyOfRange(r.words.first().s, r.words.last().e)
         }).also { v.dir.listFiles { x -> x.name.startsWith("pool-") }?.forEach { it.delete() }; m.savePool(it, f) }
-        pools[v.dir.name] = p
+        pools.keys.removeAll { it.startsWith(v.dir.name + "-") }   // drop this voice's stale pools
+        pools[key] = p
         return p
     }
 
