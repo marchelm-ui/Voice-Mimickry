@@ -1,0 +1,6 @@
+[0;93m2026-10-20 04:39:21.473199270 [W:onnxruntime:Default, device_discovery.cc:95 GetPciBusId] Skipping pci_bus_id for PCI path at "/sys/devices/LNXSYSTM:00/LNXSYBUS:00/ACPI0004:00/MSFT1000:00/5620e0c7-8062-4dce-aeb7-520c7ef76171" because filename "5620e0c7-8062-4dce-aeb7-520c7ef76171" did not match expected pattern of [0-9a-f]+:[0-9a-f]+:[0-9a-f]+[.][0-9a-f]+[m
+/home/runner/work/Voice-Mimickry/Voice-Mimickry/eval/../engine/bank.py:182: RuntimeWarning: Mean of empty slice
+  wd.mf_out = mf[max(0, b - 3):max(1, b)].mean(axis=0)
+/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/numpy/_core/_methods.py:134: RuntimeWarning: invalid value encountered in divide
+  ret = um.true_divide(
+ls1919: 50 recordings, 881 words, 373 distinct, 579s

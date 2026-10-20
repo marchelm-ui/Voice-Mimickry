@@ -1,0 +1,15 @@
+[0;93m2026-10-20 04:42:23.729841137 [W:onnxruntime:Default, device_discovery.cc:95 GetPciBusId] Skipping pci_bus_id for PCI path at "/sys/devices/LNXSYSTM:00/LNXSYBUS:00/ACPI0004:00/MSFT1000:00/5620e0c7-8062-4dce-aeb7-520c7ef76171" because filename "5620e0c7-8062-4dce-aeb7-520c7ef76171" did not match expected pattern of [0-9a-f]+:[0-9a-f]+:[0-9a-f]+[.][0-9a-f]+[m
+/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/torch/nn/utils/weight_norm.py:145: FutureWarning: `torch.nn.utils.weight_norm` is deprecated in favor of `torch.nn.utils.parametrizations.weight_norm`.
+  WeightNorm.apply(module, name, dim)
+Downloading: "https://github.com/bshall/knn-vc/releases/download/v0.1/prematch_g_02500000.pt" to /home/runner/.cache/torch/hub/checkpoints/prematch_g_02500000.pt
+Removing weight norm...
+[HiFiGAN] Generator loaded with 16,523,393 parameters.
+Downloading: "https://github.com/bshall/knn-vc/releases/download/v0.1/WavLM-Large.pt" to /home/runner/.cache/torch/hub/checkpoints/WavLM-Large.pt
+WavLM-Large loaded with 315,453,120 parameters.
+ls422 done
+system              WER  SpkSim   SIG  OVRL   Seam   Dist  F0corr   sec
+truth              0.0%   0.835  3.51  3.18   1.00   0.00    1.00   0.0
+kenku             37.9%   0.473  3.31  2.62   1.17 174.03    0.24  12.6
+knnvc              5.7%   0.681  3.53  3.24   1.02 134.63    0.29   7.1
+knnvc_clone        3.4%   0.722  3.42  2.83   0.86 133.65    0.32   2.5
+pocket             6.9%   0.372  3.53  3.17   0.80 169.83    0.31   1.3
