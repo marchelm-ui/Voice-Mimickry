@@ -45,6 +45,32 @@ class VoicesTab(private val a: MainActivity) {
         if (!a.engine.ready) { list.addView(ui.body("Loading…")); return }
         if (a.engine.voices.isEmpty()) list.addView(ui.body("No voices yet."))
         for (v in a.engine.voices) list.addView(card(v), ui.fill(12))
+        val have = a.engine.voices.map { it.name }.toSet()
+        val starters = a.engine.presets().filter { it.name !in have }
+        if (starters.isNotEmpty()) {
+            list.addView(ui.heading("Starter voices"), ui.fill(16))
+            list.addView(ui.body("Ready-made voices that come with the app — two real readers and three characters. " +
+                "Adding one takes a minute while the kenku listens to it."), ui.fill(8))
+            for (p in starters) list.addView(presetCard(p), ui.fill(12))
+        }
+    }
+
+    private fun presetCard(p: Engine.Preset) = ui.card().apply {
+        addView(ui.heading("✨ ${p.name}"))
+        addView(ui.body(p.blurb + " · ${p.seconds / 60} min of speech"), ui.fill(8))
+        addView(ui.button("＋ Add ${p.name}", Ui.Kind.PRIMARY) { installPreset(p) }, ui.fill(6))
+    }
+
+    private fun installPreset(p: Engine.Preset) {
+        if (!a.engine.ready) { a.toast("Still unpacking the voice tools — one moment."); return }
+        a.setStatus("Learning ${p.name}…")
+        a.work({
+            a.engine.installPreset(p) { msg -> a.main.post { a.setStatus(msg) } }
+        }) { r ->
+            a.setStatus(null)
+            r.onSuccess { a.prefs.edit().putBoolean("hasVoice", true).apply(); refresh(); a.toast("${p.name} is ready in the Speak tab.") }
+                .onFailure { a.toast("Couldn't add ${p.name}: ${it.message}") }
+        }
     }
 
     private fun card(v: VoiceBank) = ui.card().apply {
@@ -78,7 +104,7 @@ class VoicesTab(private val a: MainActivity) {
     }
 
     private fun record(v: VoiceBank) {
-        if (!a.engine.ready) return
+        if (!a.engine.ready) { a.toast("Still unpacking the voice tools — one moment."); return }
         a.withMic {
             val rec = AudioIO.Recorder()
             recorder = rec
@@ -89,7 +115,11 @@ class VoicesTab(private val a: MainActivity) {
                 .setPositiveButton("Done") { _, _ -> finishRecording(v) }
                 .setNegativeButton("Cancel") { _, _ -> rec.stop(); recorder = null }
                 .setCancelable(false).show()
-            rec.start()
+            try { rec.start() } catch (e: Throwable) {
+                recorder = null; dlg.dismiss()
+                a.toast(e.message ?: "The microphone wouldn't open.")
+                return@withMic
+            }
             val start = System.currentTimeMillis()
             val tick = object : Runnable {
                 override fun run() {

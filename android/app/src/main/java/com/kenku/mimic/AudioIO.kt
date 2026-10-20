@@ -31,21 +31,42 @@ object AudioIO {
         @Volatile var level = 0f; private set          // 0..1 for a meter
         @Volatile var clipped = false; private set
 
+        private var rate = 48000
+
+        /** Throws with a clear message if no microphone route works. */
         @SuppressLint("MissingPermission")
         fun start() {
-            val rate = 48000
-            val min = AudioRecord.getMinBufferSize(rate, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_FLOAT)
-            val rec = AudioRecord(MediaRecorder.AudioSource.VOICE_RECOGNITION, rate, AudioFormat.CHANNEL_IN_MONO,
-                AudioFormat.ENCODING_PCM_FLOAT, max(min, rate / 5 * 4))
+            var rec: AudioRecord? = null
+            var isFloat = true
+            // some phones refuse float capture or 48 kHz; walk down until one initializes
+            for ((r, enc) in listOf(48000 to AudioFormat.ENCODING_PCM_FLOAT, 48000 to AudioFormat.ENCODING_PCM_16BIT,
+                                    44100 to AudioFormat.ENCODING_PCM_16BIT, 16000 to AudioFormat.ENCODING_PCM_16BIT)) {
+                val min = AudioRecord.getMinBufferSize(r, AudioFormat.CHANNEL_IN_MONO, enc)
+                if (min <= 0) continue
+                val cand = try {
+                    AudioRecord(MediaRecorder.AudioSource.VOICE_RECOGNITION, r, AudioFormat.CHANNEL_IN_MONO, enc, max(min, r))
+                } catch (e: Throwable) { null } ?: continue
+                if (cand.state != AudioRecord.STATE_INITIALIZED) { cand.release(); continue }
+                try { cand.startRecording() } catch (e: Throwable) { cand.release(); continue }
+                if (cand.recordingState != AudioRecord.RECORDSTATE_RECORDING) { try { cand.stop() } catch (e: Throwable) {}; cand.release(); continue }
+                rec = cand; rate = r; isFloat = enc == AudioFormat.ENCODING_PCM_FLOAT
+                break
+            }
+            val ar = rec ?: throw IllegalStateException("The microphone wouldn't open. Close other recording apps and try again.")
             running = true
             chunks.clear(); clipped = false
-            rec.startRecording()
             thread = Thread {
-                val buf = FloatArray(rate / 20)
+                val fbuf = FloatArray(rate / 20)
+                val sbuf = ShortArray(rate / 20)
                 while (running) {
-                    val n = rec.read(buf, 0, buf.size, AudioRecord.READ_BLOCKING)
-                    if (n > 0) {
-                        val c = buf.copyOf(n)
+                    val c: FloatArray? = if (isFloat) {
+                        val n = ar.read(fbuf, 0, fbuf.size, AudioRecord.READ_BLOCKING)
+                        if (n > 0) fbuf.copyOf(n) else null
+                    } else {
+                        val n = ar.read(sbuf, 0, sbuf.size, AudioRecord.READ_BLOCKING)
+                        if (n > 0) FloatArray(n) { i -> sbuf[i] / 32768f } else null
+                    }
+                    if (c != null) {
                         synchronized(chunks) { chunks += c }
                         var pk = 0f
                         for (v in c) { val a = abs(v); if (a > pk) pk = a }
@@ -53,7 +74,8 @@ object AudioIO {
                         if (pk > 0.99f) clipped = true
                     }
                 }
-                rec.stop(); rec.release()
+                try { ar.stop() } catch (e: Throwable) {}
+                ar.release()
             }.also { it.start() }
         }
 
@@ -65,7 +87,7 @@ object AudioIO {
             val x = FloatArray(all.sumOf { it.size })
             var p = 0
             for (c in all) { System.arraycopy(c, 0, x, p, c.size); p += c.size }
-            return Dsp.resample(x, 48000, Dsp.SR)
+            return Dsp.resample(x, rate, Dsp.SR)
         }
     }
 
@@ -112,6 +134,27 @@ object AudioIO {
             .putShort(2).putShort(16)
         h.put("data".toByteArray()).putInt(x.size * 2)
         FileOutputStream(f).use { it.write(h.array()); it.write(data.array()) }
+    }
+
+    /** Read a 16-bit mono wav from the APK's assets at 24 kHz (the starter-voice packs). */
+    fun readWavAsset(ctx: Context, path: String): FloatArray {
+        val d = ctx.assets.open(path).use { it.readBytes() }
+        val b = ByteBuffer.wrap(d).order(ByteOrder.LITTLE_ENDIAN)
+        require(d.size > 44 && String(d, 0, 4) == "RIFF") { "Not a wav: $path" }
+        var rate = Dsp.SR
+        var o = 12
+        while (o + 8 <= d.size) {                     // walk RIFF chunks; ffmpeg adds LIST etc.
+            val id = String(d, o, 4)
+            val sz = b.getInt(o + 4)
+            if (id == "fmt ") rate = b.getInt(o + 12)
+            if (id == "data") {
+                val n = minOf(sz, d.size - o - 8) / 2
+                val x = FloatArray(n) { i -> b.getShort(o + 8 + i * 2) / 32768f }
+                return if (rate == Dsp.SR) x else Dsp.resample(x, rate, Dsp.SR)
+            }
+            o += 8 + sz + (sz and 1)
+        }
+        throw IllegalArgumentException("No audio data in $path")
     }
 
     /** Decode any audio file Android understands (wav, mp3, m4a, ogg, ...) to 24 kHz mono. */

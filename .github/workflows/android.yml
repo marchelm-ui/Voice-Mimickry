@@ -47,6 +47,9 @@ jobs:
           [ -s dl/wavlm6.fp16.onnx ] || curl -fL --retry 3 -o dl/wavlm6.fp16.onnx $M/wavlm6.fp16.onnx
           [ -s dl/hifigan.fp16.onnx ] || curl -fL --retry 3 -o dl/hifigan.fp16.onnx $M/hifigan.fp16.onnx
           cp dl/wavlm6.fp16.onnx dl/hifigan.fp16.onnx app/src/main/assets/knnvc/
+          git -C ${{ github.workspace }} fetch -q --depth 1 origin preset-voices
+          git -C ${{ github.workspace }} worktree add -q pv FETCH_HEAD
+          mkdir -p app/src/main/assets/presets && cp -r ${{ github.workspace }}/pv/* app/src/main/assets/presets/
           cp dl/sherpa-onnx.aar app/libs/sherpa-onnx.aar
           cp dl/ort.aar app/libs/onnxruntime-android.aar
           tar xjf dl/kokoro.tar.bz2; tar xjf dl/asr.tar.bz2; tar xjf dl/pocket.tar.bz2
@@ -82,6 +85,7 @@ jobs:
           unzip -l VoiceMimickry.apk | grep -q 'lib/arm64-v8a/libsherpa-onnx-jni.so'
           unzip -l VoiceMimickry.apk | grep -q 'assets/kokoro/model.int8.onnx'
           unzip -l VoiceMimickry.apk | grep -q 'assets/knnvc/wavlm6.fp16.onnx'
+          unzip -l VoiceMimickry.apk | grep -q 'assets/presets/index.json'
           ZA=$(ls -d $ANDROID_HOME/build-tools/*/ | sort -V | tail -1)zipalign
           $ZA -c -P 16 4 VoiceMimickry.apk && echo "16 KB page alignment OK"
 

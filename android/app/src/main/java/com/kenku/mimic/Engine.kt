@@ -91,6 +91,42 @@ class Engine private constructor(private val ctx: Context) {
         return m.convert(source, p, v.loudMedian)
     }
 
+    // ------------------------------------------------------------ starter voices
+
+    data class Preset(val id: String, val name: String, val blurb: String, val seconds: Int)
+
+    /** Starter voices shipped in the APK: real public-domain readers and synthetic characters. */
+    fun presets(): List<Preset> = try {
+        val arr = org.json.JSONArray(ctx.assets.open("presets/index.json").bufferedReader().readText())
+        (0 until arr.length()).map { i ->
+            val o = arr.getJSONObject(i)
+            Preset(o.getString("id"), o.getString("name"), o.getString("blurb"), o.optInt("seconds"))
+        }
+    } catch (e: Throwable) { emptyList() }
+
+    /** Learn a starter voice from its shipped recordings; exact transcripts, so no mishearing. */
+    fun installPreset(p: Preset, progress: (String) -> Unit): VoiceBank {
+        val meta = org.json.JSONObject(ctx.assets.open("presets/${p.id}/voice.json").bufferedReader().readText())
+        val utts = meta.getJSONArray("utts")
+        val v = newVoice(p.name)
+        try {
+            for (i in 0 until utts.length()) {
+                progress("Learning ${p.name}… ${i + 1}/${utts.length()}")
+                val u = utts.getJSONObject(i)
+                val audio = AudioIO.readWavAsset(ctx, "presets/${p.id}/${u.getString("wav")}")
+                val words = com.kenku.mimic.engine.TextNorm.words(u.getString("text"))
+                if (words.isEmpty()) continue
+                val r = VoiceBank.capture("p${p.id}$i", audio, words, 1.0, aligner)
+                if (r.words.isNotEmpty()) { v.add(r); v.saveRecording(r) }
+            }
+        } catch (e: Throwable) {
+            deleteVoice(v)
+            throw e
+        }
+        if (v.recs.isEmpty()) { deleteVoice(v); throw IllegalStateException("Couldn't learn ${p.name}.") }
+        return v
+    }
+
     fun newVoice(name: String): VoiceBank {
         val id = "v" + System.currentTimeMillis()
         val v = VoiceBank(File(voicesDir, id), name)
