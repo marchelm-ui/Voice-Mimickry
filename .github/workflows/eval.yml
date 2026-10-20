@@ -82,7 +82,10 @@ jobs:
               python3 eval/make_proxy_data.py data ${{ matrix.speaker }} ;;
           esac
       - name: Learn the voice
-        run: python3 eval/build_banks.py data ${{ matrix.speaker }}
+        run: |
+          set -o pipefail
+          mkdir -p out
+          python3 eval/build_banks.py data ${{ matrix.speaker }} 2>&1 | tee out/learn.txt
       - name: Benchmark
         run: |
           set -o pipefail
@@ -121,6 +124,7 @@ jobs:
           cp res/*/results-*.json /tmp/r/ 2>/dev/null || true
           cat res/*/ablate.txt > /tmp/r/ABLATE.txt 2>/dev/null || true
           for f in res/*/log.txt; do cp "$f" "/tmp/r/log-$(basename $(dirname $f)).txt" 2>/dev/null; done || true
+          for f in res/*/learn.txt; do cp "$f" "/tmp/r/learn-$(basename $(dirname $f)).txt" 2>/dev/null; done || true
           mkdir -p /tmp/r/wav && cp res/*/*.wav /tmp/r/wav/ 2>/dev/null || true
           echo "run ${{ github.run_number }} commit ${{ github.sha }}" > /tmp/r/RUN.txt
           git config user.name build-bot

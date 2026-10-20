@@ -50,7 +50,7 @@ class Recording:
 
 # ---------------------------------------------------------------- speech recognition
 
-def recognize(paths16k, batch=6):
+def recognize(paths16k, batch=3):
     """Run the recognizer on 16 kHz wav files -> list of (text, tokens, token_start_times).
 
     Batched: the recognizer holds every file's attention state at once, so a long list of long
