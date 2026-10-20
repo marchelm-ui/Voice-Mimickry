@@ -1,14 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Daylight: iron-gall ink on aged parchment, ember-red accents, antique gold. -->
 <resources>
-    <color name="bg">#EEF0F4</color>
-    <color name="surface">#FFFFFF</color>
-    <color name="ink">#1D2333</color>
-    <color name="muted">#5B6478</color>
-    <color name="line">#D4D9E3</color>
-    <color name="accent">#3D4FA8</color>
-    <color name="accent_ink">#FFFFFF</color>
-    <color name="brass">#8A5F17</color>
-    <color name="danger">#B3402E</color>
-    <color name="tab_on">#E3E7F8</color>
-    <color name="ripple">#333D4FA8</color>
+    <color name="bg">#F2E9D4</color>
+    <color name="surface">#FBF4E2</color>
+    <color name="ink">#2B2012</color>
+    <color name="muted">#6E5F49</color>
+    <color name="line">#D8C9A5</color>
+    <color name="accent">#8E2B1C</color>
+    <color name="accent_ink">#FBF1DC</color>
+    <color name="brass">#8A6414</color>
+    <color name="danger">#A33327</color>
+    <color name="tab_on">#EBDFC0</color>
+    <color name="ripple">#338E2B1C</color>
 </resources>

@@ -63,7 +63,7 @@ class Ui(val ctx: Context) {
     fun heading(text: String) = TextView(ctx).apply {
         this.text = text
         textSize = 18f
-        setTypeface(typeface, Typeface.BOLD)
+        typeface = Typeface.create(Typeface.SERIF, Typeface.BOLD)
         setTextColor(c(R.color.ink))
     }
 

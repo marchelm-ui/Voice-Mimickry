@@ -1,14 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- By torchlight: deep umber, pale vellum ink, ember-glow accents. -->
 <resources>
-    <color name="bg">#12151F</color>
-    <color name="surface">#1B2030</color>
-    <color name="ink">#E7E9F0</color>
-    <color name="muted">#9AA2B8</color>
-    <color name="line">#2D3448</color>
-    <color name="accent">#8C9BEA</color>
-    <color name="accent_ink">#12151F</color>
+    <color name="bg">#171310</color>
+    <color name="surface">#221B14</color>
+    <color name="ink">#EFE4CD</color>
+    <color name="muted">#A8977D</color>
+    <color name="line">#3A3126</color>
+    <color name="accent">#E07B4C</color>
+    <color name="accent_ink">#1B130C</color>
     <color name="brass">#D9A54E</color>
     <color name="danger">#F08A78</color>
-    <color name="tab_on">#28304A</color>
-    <color name="ripple">#448C9BEA</color>
+    <color name="tab_on">#352A1E</color>
+    <color name="ripple">#44E07B4C</color>
 </resources>

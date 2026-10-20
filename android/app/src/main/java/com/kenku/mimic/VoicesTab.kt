@@ -61,12 +61,16 @@ class VoicesTab(private val a: MainActivity) {
         addView(ui.button("＋ Add ${p.name}", Ui.Kind.PRIMARY) { installPreset(p) }, ui.fill(6))
     }
 
+    private val installing = HashSet<String>()
+
     private fun installPreset(p: Engine.Preset) {
         if (!a.engine.ready) { a.toast("Still unpacking the voice tools — one moment."); return }
+        if (!installing.add(p.id)) return
         a.setStatus("Learning ${p.name}…")
         a.work({
             a.engine.installPreset(p) { msg -> a.main.post { a.setStatus(msg) } }
         }) { r ->
+            installing.remove(p.id)
             a.setStatus(null)
             r.onSuccess { v ->
                 a.prefs.edit().putBoolean("hasVoice", true).apply()

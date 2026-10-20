@@ -195,10 +195,15 @@ class SpeakTab(private val a: MainActivity) {
     private fun chip(label: String, on: Boolean, click: () -> Unit) =
         ui.button(label, if (on) Ui.Kind.PRIMARY else Ui.Kind.NORMAL, click)
 
+    private var speaking = false
+
     private fun say() {
         val v = voice ?: run { a.toast("Add a voice first."); return }
         val text = input.text.toString().trim()
-        if (text.isEmpty() || !a.engine.ready) return
+        if (text.isEmpty()) return
+        if (!a.engine.ready) { a.toast("Still unpacking the voice tools — one moment."); return }
+        if (speaking) { a.toast("Still speaking — one moment."); return }
+        speaking = true
         ui.tick(input)
         a.setStatus("Mimicking ${v.name}…")
         val opts = Synth.Opts(fallback = mode)
@@ -255,6 +260,7 @@ class SpeakTab(private val a: MainActivity) {
             for (c in pieces) { System.arraycopy(c, 0, audio, p, c.size); p += c.size }
             audio to Synth.Report(if (spoke) words else com.kenku.mimic.engine.TextNorm.words(text).map { it to Synth.Source.NEURAL }, seams)
         }) { r ->
+            speaking = false
             a.setStatus(null)
             r.onSuccess { (audio, rep) ->
                 val shown = describe(rep)
