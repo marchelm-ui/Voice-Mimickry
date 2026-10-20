@@ -68,8 +68,11 @@ class VoicesTab(private val a: MainActivity) {
             a.engine.installPreset(p) { msg -> a.main.post { a.setStatus(msg) } }
         }) { r ->
             a.setStatus(null)
-            r.onSuccess { a.prefs.edit().putBoolean("hasVoice", true).apply(); refresh(); a.toast("${p.name} is ready in the Speak tab.") }
-                .onFailure { a.toast("Couldn't add ${p.name}: ${it.message}") }
+            r.onSuccess { v ->
+                a.prefs.edit().putBoolean("hasVoice", true).apply()
+                refresh(); a.toast("${p.name} is ready in the Speak tab.")
+                a.work({ a.engine.pool(v) }) {}              // build the mimicry pool now, not on the first line
+            }.onFailure { a.toast("Couldn't add ${p.name}: ${it.message}") }
         }
     }
 
@@ -167,8 +170,11 @@ class VoicesTab(private val a: MainActivity) {
             learned
         }) { r ->
             a.setStatus(null)
-            r.onSuccess { n -> a.toast(if (n == 0) "I couldn't make out any words. Try somewhere quieter." else "Learned $n words. Tap “Check words” to fix any I misheard."); refresh() }
-                .onFailure { a.toast("Something went wrong: ${it.message}") }
+            r.onSuccess { n ->
+                a.toast(if (n == 0) "I couldn't make out any words. Try somewhere quieter." else "Learned $n words. Tap “Check words” to fix any I misheard.")
+                refresh()
+                if (n > 0) a.work({ a.engine.pool(v) }) {}   // build the mimicry pool now, not on the first line
+            }.onFailure { a.toast("Something went wrong: ${it.message}") }
         }
     }
 
