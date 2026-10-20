@@ -203,13 +203,23 @@ class SpeakTab(private val a: MainActivity) {
         a.setStatus("Mimicking ${v.name}…")
         val opts = Synth.Opts(fallback = mode)
         val fxKey = effect
+        val player = AudioIO.openStream()                          // starts sounding at the first finished piece
         a.work({
-            // split the line at [sound tags]: speech between them, the sounds dropped in place
+            // split the line at [sound tags], and speech at sentence ends, so a long line starts
+            // sounding after its first sentence while the rest is still being made
             val gap = FloatArray(com.kenku.mimic.engine.Dsp.SR * 3 / 20)      // 150 ms
+            val fx = LineEffect(fxKey)
             val pieces = ArrayList<FloatArray>()
             val words = ArrayList<Pair<String, Synth.Source>>()
             var seams = 0
             var spoke = false
+            fun emit(raw: FloatArray) {
+                if (raw.isEmpty()) return
+                if (pieces.isNotEmpty()) { val g = fx.process(gap.copyOf()); pieces += g; player.feed(g) }
+                val y = fx.process(raw)
+                pieces += y
+                player.feed(y)
+            }
             for (m in Regex("\\[([^\\]]+)\\]|[^\\[]+").findAll(text)) {
                 val tag = m.groups[1]?.value
                 if (tag != null) {
@@ -217,29 +227,32 @@ class SpeakTab(private val a: MainActivity) {
                     val au = try {
                         if (s.isUserFile) AudioIO.decodeFile(s.file) else AudioIO.decodeAsset(a, s.file)
                     } catch (e: Throwable) { continue }
-                    if (pieces.isNotEmpty()) pieces += gap
-                    pieces += au
+                    emit(au)
                 } else {
                     val part = m.value.trim()
-                    if (part.isEmpty() || com.kenku.mimic.engine.TextNorm.words(part).isEmpty()) continue
-                    val (au, rep) = if (how == "mimic") {
-                        val x = a.engine.sayMimic(v, part)
-                        if (x != null && x.isNotEmpty()) x to Synth.Report(com.kenku.mimic.engine.TextNorm.words(part).map { it to Synth.Source.NEURAL }, 0)
-                        else a.engine.synth.speak(v, part, opts)
-                    } else a.engine.synth.speak(v, part, opts)
-                    if (pieces.isNotEmpty()) pieces += gap
-                    pieces += au
-                    words += rep.words
-                    seams += rep.seams
-                    spoke = true
+                    if (part.isEmpty()) continue
+                    val sentences = Regex("[^.!?…]+[.!?…]*").findAll(part).map { it.value.trim() }
+                        .filter { com.kenku.mimic.engine.TextNorm.words(it).isNotEmpty() }
+                    for (sent in sentences) {
+                        val (au, rep) = if (how == "mimic") {
+                            val x = a.engine.sayMimic(v, sent)
+                            if (x != null && x.isNotEmpty()) x to Synth.Report(com.kenku.mimic.engine.TextNorm.words(sent).map { it to Synth.Source.NEURAL }, 0)
+                            else a.engine.synth.speak(v, sent, opts)
+                        } else a.engine.synth.speak(v, sent, opts)
+                        emit(au)
+                        words += rep.words
+                        seams += rep.seams
+                        spoke = true
+                    }
                 }
             }
-            if (pieces.isEmpty()) throw IllegalArgumentException("Nothing to say — no words and no matching sounds.")
-            var audio = FloatArray(pieces.sumOf { it.size })
+            if (pieces.isEmpty()) { player.cancel(); throw IllegalArgumentException("Nothing to say — no words and no matching sounds.") }
+            val tail = fx.tail()
+            if (tail.isNotEmpty()) { pieces += tail; player.feed(tail) }
+            player.finish()
+            val audio = FloatArray(pieces.sumOf { it.size })
             var p = 0
             for (c in pieces) { System.arraycopy(c, 0, audio, p, c.size); p += c.size }
-            val fx = LineEffect(fxKey)
-            if (fx.active) audio = fx.process(audio) + fx.tail()   // the tail is the echo ringing on
             audio to Synth.Report(if (spoke) words else com.kenku.mimic.engine.TextNorm.words(text).map { it to Synth.Source.NEURAL }, seams)
         }) { r ->
             a.setStatus(null)
@@ -247,11 +260,10 @@ class SpeakTab(private val a: MainActivity) {
                 val shown = describe(rep)
                 result.text = shown
                 legend.text = summary(rep)
-                AudioIO.play(audio)
                 lines.add(0, Line(text, v.name, audio, shown))
                 if (lines.size > 30) lines.removeAt(lines.size - 1)
                 drawHistory()
-            }.onFailure { a.toast("Couldn't say that: ${it.message}") }
+            }.onFailure { player.cancel(); a.toast("Couldn't say that: ${it.message}") }
         }
     }
 

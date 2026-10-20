@@ -94,6 +94,53 @@ object AudioIO {
     // ------------------------------------------------------------ playback
 
     private var track: AudioTrack? = null
+    private var stream: StreamPlayer? = null
+
+    /**
+     * Plays audio piece by piece while later pieces are still being made, so a long line starts
+     * sounding after its first sentence. feed() never blocks the caller; a writer thread trickles
+     * the queue into a streaming AudioTrack.
+     */
+    class StreamPlayer {
+        private val q = java.util.concurrent.LinkedBlockingQueue<FloatArray>()
+        @Volatile private var cancelled = false
+        private val track = AudioTrack.Builder()
+            .setAudioAttributes(AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_MEDIA)
+                .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH).build())
+            .setAudioFormat(AudioFormat.Builder().setEncoding(AudioFormat.ENCODING_PCM_FLOAT)
+                .setSampleRate(Dsp.SR).setChannelMask(AudioFormat.CHANNEL_OUT_MONO).build())
+            .setTransferMode(AudioTrack.MODE_STREAM)
+            .setBufferSizeInBytes(Dsp.SR * 4)                     // 1 s of headroom
+            .build()
+        private val writer = Thread {
+            try {
+                track.play()
+                while (!cancelled) {
+                    val c = q.take()
+                    if (c.isEmpty()) break                         // the end marker
+                    var off = 0
+                    while (off < c.size && !cancelled) {
+                        val n = track.write(c, off, c.size - off, AudioTrack.WRITE_BLOCKING)
+                        if (n <= 0) break
+                        off += n
+                    }
+                }
+                if (!cancelled) track.stop() else { track.pause(); track.flush() }
+            } catch (e: Throwable) { /* playback already torn down */ }
+            track.release()
+        }.apply { start() }
+
+        fun feed(x: FloatArray) { if (x.isNotEmpty() && !cancelled) q.put(x) }
+        fun finish() = q.put(FloatArray(0))
+        fun cancel() { cancelled = true; q.clear(); q.put(FloatArray(0)) }
+    }
+
+    /** Starts streaming playback, stopping whatever was playing. */
+    @Synchronized
+    fun openStream(): StreamPlayer {
+        stop()
+        return StreamPlayer().also { stream = it }
+    }
 
     @Synchronized
     fun play(x: FloatArray, onDone: (() -> Unit)? = null) {
@@ -121,6 +168,8 @@ object AudioIO {
     fun stop() {
         track?.let { try { it.stop() } catch (e: Throwable) {}; it.release() }
         track = null
+        stream?.cancel()
+        stream = null
     }
 
     // ------------------------------------------------------------ files
