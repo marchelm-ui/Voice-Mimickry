@@ -243,7 +243,7 @@ class SpeakTab(private val a: MainActivity) {
             val dspSr = Dsp.SR
             // the voices that take turns when voice changes are on; the chosen voice leads
             val cast = if (rotateKey == "off") listOf(v)
-                else ([v] + a.engine.voices.filter { it !== v && it.recs.isNotEmpty() }).ifEmpty { listOf(v) }
+                else listOf(v) + a.engine.voices.filter { it !== v && it.recs.isNotEmpty() }
             var castAt = 0
             val gap = FloatArray(dspSr / 8)                         // 125 ms: the deliberate cut
             val xf = dspSr * 40 / 1000                              // 40 ms: the fluid join
