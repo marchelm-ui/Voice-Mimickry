@@ -51,6 +51,20 @@ some of the list above.
 - **fp16 ONNX needs ARM.** onnxruntime emulates fp16 on x64, turning a seconds-long check into
   40+ minutes of CI hang; converting with `disable_shape_infer=True` is also mandatory on
   big models, where whole-graph shape inference itself runs for the better part of an hour.
+- **Mimic-first learning: never make the user wait for what the engine doesn't need.** Frame
+  mimicry needs audio and a feature pool — no transcripts, no alignment. Moving recognition and
+  alignment to a background pass cut "record → voice speaks" from minutes to seconds, and the
+  save-before-any-model rule means a model failure can no longer lose a recording (which it
+  silently did).
+- **Attention cost is quadratic: window the encoder.** WavLM over 3 minutes in one call does
+  ~10x the work of 10-second windows with half a second of context, for features identical to
+  within the overlap. Same lesson as the CI fp16 hang: big transformers punish long inputs.
+- **Ship precomputed features under the cache's own names.** The phone caches pool features per
+  recording id; computing those files in the cloud and shipping them in the APK under the exact
+  ids the installer uses turned "add a starter voice" from minutes of encoding into a file copy.
+- **Give the app its own instruments.** On-screen first-sound/whole-line timings and a
+  crash-report-on-next-launch channel mean the improvement loop measures real phones instead of
+  guessing from a sandbox.
 - **The mimicry engine is at a measurable plateau.** Pitch-matching the guide to the speaker
   before conversion and doubling the neighbours to 8 both changed nothing (speaker similarity
   0.730–0.732, misheard 5.2–5.5% across 8 voices, all within noise of the current engine).

@@ -301,7 +301,13 @@ class SpeakTab(private val a: MainActivity) {
                     } catch (e: Throwable) { continue }
                     flush()
                     if (pieces.isNotEmpty()) push(fx.process(gap.copyOf()))
-                    push(fx.process(SfxDsp.fadeEdges(au, 4)))
+                    // a bundled sound can be far louder than the voice: pull it toward the line's level
+                    var sfxAu = au
+                    if (loudTarget != 0.0) {
+                        val l = Dsp.loudness(sfxAu)
+                        if (l > loudTarget + 6) sfxAu = Dsp.scale(sfxAu, Math.pow(10.0, (loudTarget + 6 - l) / 20))
+                    }
+                    push(fx.process(SfxDsp.fadeEdges(sfxAu, 4)))
                 } else {
                     val part = m.value.trim()
                     if (part.isEmpty()) continue
