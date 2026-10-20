@@ -68,6 +68,12 @@ class AppStructureTest {
                 assertTrue("$id utt $j has no words", u.getString("text").isNotBlank())
                 val audio = AudioIO.readWavAsset(ctx, "presets/$id/${u.getString("wav")}")
                 assertTrue("$id/${u.getString("wav")} is empty", audio.size > com.kenku.mimic.engine.Dsp.SR / 2)
+                // precomputed pool features: present, frame-aligned, and roughly one frame per 20 ms
+                val feats = ctx.assets.open("presets/$id/feat-p$id$j.f16").use { it.readBytes() }
+                assertEquals("$id feat $j is not whole frames", 0, feats.size % 2048)
+                val frames = feats.size / 2048
+                val expect = audio.size / (com.kenku.mimic.engine.Dsp.SR / 50)
+                assertTrue("$id feat $j frame count $frames vs audio $expect", frames in (expect * 8 / 10)..(expect + 10))
             }
         }
     }

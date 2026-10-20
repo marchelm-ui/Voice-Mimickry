@@ -17,7 +17,7 @@ import wave
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "engine"))
 
 SR = 24000
-MAX_SECONDS = 180          # per voice: enough sounds for mimicry, small enough for the APK
+MAX_SECONDS = 120          # per voice: plenty of sounds for mimicry, light in the APK and in RAM
 
 # (pack id, shown name, blurb, source kind, source key)
 VOICES = [

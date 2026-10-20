@@ -134,10 +134,17 @@ class Engine private constructor(private val ctx: Context) {
                 val audio = AudioIO.readWavAsset(ctx, "presets/${p.id}/${u.getString("wav")}")
                 val r = com.kenku.mimic.engine.Recording("p${p.id}$i", audio, u.getString("text"), emptyList())
                 v.add(r); v.saveRecording(r)
+                // the sound-pool features ship precomputed, so adding a starter voice never
+                // runs the encoder on the phone: it is a file copy
+                try {
+                    ctx.assets.open("presets/${p.id}/feat-${r.id}.f16").use { s ->
+                        FileOutputStream(File(v.dir, "feat-${r.id}.f16")).use { s.copyTo(it, 1 shl 20) }
+                    }
+                } catch (e: Throwable) { /* no shipped features: the pool builds on first use */ }
                 if (sample.sumOf { it.size } < com.kenku.mimic.engine.Dsp.SR * 20) sample += audio
             }
             v.hintStats(com.kenku.mimic.engine.Dsp.concat(sample))
-            progress("Learning ${p.name}'s sounds…")
+            progress("Waking ${p.name}…")
             pool(v)
         } catch (e: Throwable) {
             deleteVoice(v)
