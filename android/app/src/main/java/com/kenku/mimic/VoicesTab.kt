@@ -87,12 +87,31 @@ class VoicesTab(private val a: MainActivity) {
         val row = ui.row()
         row.addView(ui.button("🎙 Record", Ui.Kind.PRIMARY) { record(v) }, ui.wrap())
         row.addView(ui.button("📂 Import") { importTarget = v; pickFile.launch("audio/*") }, ui.wrap())
+        if (v.recs.isNotEmpty()) row.addView(ui.button("▶ Test") { test(v) }, ui.wrap())
         addView(row, ui.fill(6))
         val row2 = ui.row()
         row2.addView(ui.button("📝 Check words") { review(v) }, ui.wrap())
         row2.addView(ui.button("Rename", Ui.Kind.QUIET) { rename(v) }, ui.wrap())
         row2.addView(ui.button("Delete", Ui.Kind.DANGER) { delete(v) }, ui.wrap())
         addView(row2)
+    }
+
+    private var testing = false
+
+    /** One tap to hear the voice, no typing: a stock kenku line through frame mimicry. */
+    private fun test(v: VoiceBank) {
+        if (!a.engine.ready || testing) return
+        testing = true
+        a.setStatus("Mimicking ${v.name}…")
+        val line = listOf("Well met, traveler.", "Who goes there?", "The guards are here!", "Shiny. Want the shiny.").random()
+        a.work({
+            a.engine.sayMimic(v, line)
+                ?: a.engine.synth.speak(v, line, com.kenku.mimic.engine.Synth.Opts()).first
+        }) { r ->
+            testing = false
+            a.setStatus(null)
+            r.onSuccess { AudioIO.play(it) }.onFailure { a.toast("Couldn't test that voice: ${it.message}") }
+        }
     }
 
     private fun newVoice() {
