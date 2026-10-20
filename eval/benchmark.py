@@ -74,17 +74,24 @@ def run_system(name, spk, bank, line, i, data):
         return synth.speak(bank, line, o)
     if name == "pocket":
         return pocket(bank, line), {}
-    if name in ("knnvc", "knnvc_clone"):
+    if name in ("knnvc", "knnvc_clone", "knnvc_shift", "knnvc_k8"):
         import knnvc_sys
         trains = sorted(glob.glob(f"{data}/{spk}/train/*.wav"))
-        if name == "knnvc":
+        if name == "knnvc_clone":
+            src = pocket(bank, line)
+        else:
             sid = 2 if bank.f0_median > 165 else 11     # stock reader matched to the voice's pitch range
             sys.path.insert(0, os.path.dirname(__file__))
             from make_proxy_data import say
             src = say(line, sid)[0]
-        else:
-            src = pocket(bank, line)
-        return knnvc_sys.convert(src, spk, trains), {}
+        if name == "knnvc_shift" and bank.f0_median > 0:
+            # kNN-VC follows the guide's prosody, so bend the guide into the person's pitch range
+            f0 = dsp.f0_yin(src)
+            med = float(np.median(f0[f0 > 0])) if (f0 > 0).any() else 0.0
+            if med > 0:
+                ratio = min(2.0, max(0.5, bank.f0_median / med))
+                src = dsp.psola(src, f0, pitch_ratio=ratio)
+        return knnvc_sys.convert(src, spk, trains, topk=8 if name == "knnvc_k8" else 4), {}
     if name == "elevenlabs":
         # ElevenLabs v4 stock narrator, fetched by CI into the external-audio branch
         ext = os.environ.get("KENKU_EXTERNAL", "/home/claude/external")
