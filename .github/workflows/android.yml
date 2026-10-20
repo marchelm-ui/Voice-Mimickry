@@ -86,6 +86,7 @@ jobs:
           unzip -l VoiceMimickry.apk | grep -q 'assets/kokoro/model.int8.onnx'
           unzip -l VoiceMimickry.apk | grep -q 'assets/knnvc/wavlm6.fp16.onnx'
           unzip -l VoiceMimickry.apk | grep -q 'assets/presets/index.json'
+          unzip -l VoiceMimickry.apk | grep -q 'assets/sfx/catalog.json'
           ZA=$(ls -d $ANDROID_HOME/build-tools/*/ | sort -V | tail -1)zipalign
           $ZA -c -P 16 4 VoiceMimickry.apk && echo "16 KB page alignment OK"
 

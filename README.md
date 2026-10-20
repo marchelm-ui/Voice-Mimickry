@@ -16,6 +16,19 @@ The app speaks two ways, and you pick per line:
   reshaped (unit selection + PSOLA). Keeps genuinely real words intact — the truest kenku —
   but reads as rougher and harder to understand (32.9% misheard).
 
+It also carries everything from Mocking Bird, the earlier kenku app, merged in:
+
+- **🔔 Sounds** — a medieval soundboard: 467 CC0 sounds in 11 categories (doors, coins, tavern,
+  weapons, monsters, magic…), with search, favorites, looping, and **My Mimicry** — real sounds
+  you record at the table and replay like a kenku.
+- **Sounds inside lines** — type `Pay up [coins] or else` and the sound plays in the middle of
+  the sentence; `[tag]` matches sound names, categories, or your own recordings.
+- **📜 Phrasebook** — ready-made kenku lines (combat, warnings, tavern, taunts…) via ＋ Add.
+- **Voice effects** — Cave echo, Distant (through a wall), Old memory (lo-fi) on any line.
+- **⚡ Quick lines** — pin a spoken line and replay it with one tap, even after a restart.
+- **Starter voices** — five ready-made voices (two real public-domain readers, three synthetic
+  characters) so the app speaks well before you record anyone.
+
 ## How word stitching works
 
 1. **Listen.** Record someone talking (with their permission) or import an audio file. The
@@ -81,4 +94,7 @@ person's speech the kenku has heard.
 - Zipformer English recognizer, sherpa-onnx by k2-fsa (Apache-2.0)
 - Pocket TTS by Kyutai, ONNX export via sherpa-onnx (non-commercial license): fallback reader
 - onnxruntime by Microsoft (MIT)
+- Sound effects: CC0 (public domain) packs from OpenGameArt.org, listed in
+  `android/app/src/main/assets/sfx/CREDITS.txt`
+- Starter voices: LibriVox public-domain recordings via LibriSpeech (CC BY 4.0)
 - Benchmark only: WeSpeaker ResNet34 speaker model, Microsoft DNSMOS

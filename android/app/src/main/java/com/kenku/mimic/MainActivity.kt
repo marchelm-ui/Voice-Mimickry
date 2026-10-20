@@ -23,6 +23,8 @@ class MainActivity : AppCompatActivity() {
     val prefs by lazy { getSharedPreferences("mimic", MODE_PRIVATE) }
     private lateinit var speak: SpeakTab
     private lateinit var voicesTab: VoicesTab
+    private lateinit var soundsTab: SoundsTab
+    val sfx by lazy { SfxPlayer(this) }
     private val tabViews = ArrayList<View>()
     private val tabButtons = ArrayList<TextView>()
     private lateinit var status: TextView
@@ -38,6 +40,7 @@ class MainActivity : AppCompatActivity() {
         engine = Engine.get(this)
         speak = SpeakTab(this)
         voicesTab = VoicesTab(this)
+        soundsTab = SoundsTab(this)
 
         val root = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
@@ -47,11 +50,11 @@ class MainActivity : AppCompatActivity() {
         status = ui.body("", 13f).apply { setPadding(ui.dp(16), ui.dp(6), ui.dp(16), ui.dp(6)); visibility = View.GONE }
         root.addView(status)
         val content = FrameLayout(this)
-        for (v in listOf(speak.view, voicesTab.view)) { content.addView(v, FrameLayout.LayoutParams(-1, -1)); tabViews += v }
+        for (v in listOf(speak.view, voicesTab.view, soundsTab.view)) { content.addView(v, FrameLayout.LayoutParams(-1, -1)); tabViews += v }
         root.addView(content, LinearLayout.LayoutParams(-1, 0, 1f))
         root.addView(View(this).apply { setBackgroundColor(ui.c(R.color.line)) }, LinearLayout.LayoutParams(-1, ui.dp(1)))
         val bar = ui.row(Gravity.CENTER).apply { setBackgroundColor(ui.c(R.color.surface)) }
-        listOf("🗣️  Speak", "🦜  Voices").forEachIndexed { i, label ->
+        listOf("🗣️  Speak", "🦜  Voices", "🔔  Sounds").forEachIndexed { i, label ->
             val b = TextView(this).apply {
                 text = label; textSize = 16f; gravity = Gravity.CENTER
                 setPadding(0, ui.dp(14), 0, ui.dp(14))
@@ -72,7 +75,13 @@ class MainActivity : AppCompatActivity() {
             b.setTextColor(ui.c(if (k == i) R.color.accent else R.color.muted))
             b.setBackgroundColor(if (k == i) ui.c(R.color.tab_on) else 0)
         }
-        if (i == 0) speak.refresh() else voicesTab.refresh()
+        when (i) { 0 -> speak.refresh(); 1 -> voicesTab.refresh(); else -> soundsTab.refresh() }
+    }
+
+    /** Called from the Sounds tab: drop a [tag] into the line being typed. */
+    fun insertIntoSpeak(text: String) {
+        show(0)
+        speak.insert(text)
     }
 
     private fun loadEngine() {
@@ -115,4 +124,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onStop() { super.onStop(); AudioIO.stop() }
+
+    override fun onDestroy() { super.onDestroy(); sfx.release() }
 }

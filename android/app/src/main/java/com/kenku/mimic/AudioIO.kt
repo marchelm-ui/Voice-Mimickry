@@ -161,6 +161,24 @@ object AudioIO {
     fun decode(ctx: Context, uri: Uri, maxSeconds: Int = 600): FloatArray {
         val ex = MediaExtractor()
         ex.setDataSource(ctx, uri, null)
+        return decodeExtractor(ex, maxSeconds)
+    }
+
+    /** Decode a bundled sound effect (ogg in assets) to 24 kHz mono. */
+    fun decodeAsset(ctx: Context, path: String, maxSeconds: Int = 60): FloatArray {
+        val ex = MediaExtractor()
+        ctx.assets.openFd(path).use { fd -> ex.setDataSource(fd.fileDescriptor, fd.startOffset, fd.length) }
+        return decodeExtractor(ex, maxSeconds)
+    }
+
+    /** Decode a sound the user recorded (a file path) to 24 kHz mono. */
+    fun decodeFile(path: String, maxSeconds: Int = 60): FloatArray {
+        val ex = MediaExtractor()
+        ex.setDataSource(path)
+        return decodeExtractor(ex, maxSeconds)
+    }
+
+    private fun decodeExtractor(ex: MediaExtractor, maxSeconds: Int): FloatArray {
         val track = (0 until ex.trackCount).firstOrNull {
             ex.getTrackFormat(it).getString(MediaFormat.KEY_MIME)?.startsWith("audio/") == true
         } ?: throw IllegalArgumentException("No audio in that file")

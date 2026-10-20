@@ -11,6 +11,7 @@ import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.widget.EditText
 import android.widget.HorizontalScrollView
+import android.widget.LinearLayout
 import android.widget.ScrollView
 import android.widget.TextView
 import androidx.core.content.FileProvider
@@ -24,9 +25,13 @@ class SpeakTab(private val a: MainActivity) {
     private var voice: VoiceBank? = null
     private var mode = Synth.Fallback.AUTO
     private var how = "mimic"      // "mimic": frame-level mimicry; "stitch": word stitching
+    private var effect = a.prefs.getString("effect", "none") ?: "none"
     private val howRow = ui.row()
     private val voiceRow = ui.row()
     private val modeRow = ui.row()
+    private val effectRow = ui.row()
+    private val quickWrap = ui.column()
+    private val quickRow = ui.row()
     private val input = EditText(a).apply {
         hint = "What should your kenku say?"
         textSize = 18f
@@ -39,19 +44,69 @@ class SpeakTab(private val a: MainActivity) {
     private val result = ui.body("", 17f, R.color.ink)
     private val legend = ui.body("", 12f)
     private val history = ui.column()
-    private class Line(val text: String, val voice: String, val audio: FloatArray, val shown: CharSequence)
+    private class Line(val text: String, val voice: String, val audio: FloatArray, val shown: CharSequence, var pinId: String? = null)
     private val lines = ArrayList<Line>()
+
+    /** A pinned line: kept on disk so quick lines survive restarts. */
+    private class Pin(val id: String, val text: String, val voice: String)
+    private val pins = ArrayList<Pin>()
+    private val pinDir get() = java.io.File(a.filesDir, "pins").apply { mkdirs() }
+
+    private fun loadPins() {
+        pins.clear()
+        try {
+            val arr = org.json.JSONArray(java.io.File(pinDir, "index.json").readText())
+            for (i in 0 until arr.length()) {
+                val o = arr.getJSONObject(i)
+                val p = Pin(o.getString("id"), o.getString("text"), o.getString("voice"))
+                if (java.io.File(pinDir, p.id + ".wav").exists()) pins += p
+            }
+        } catch (e: Throwable) { /* nothing pinned yet */ }
+    }
+
+    private fun savePins() {
+        val arr = org.json.JSONArray()
+        pins.forEach { arr.put(org.json.JSONObject().put("id", it.id).put("text", it.text).put("voice", it.voice)) }
+        java.io.File(pinDir, "index.json").writeText(arr.toString())
+    }
+
+    private fun pin(l: Line) {
+        val id = "pin" + System.currentTimeMillis()
+        AudioIO.writeWav(java.io.File(pinDir, "$id.wav"), l.audio)
+        pins.add(0, Pin(id, l.text, l.voice))
+        l.pinId = id
+        savePins()
+        renderQuick(); drawHistory()
+    }
+
+    private fun unpin(id: String) {
+        java.io.File(pinDir, "$id.wav").delete()
+        pins.removeAll { it.id == id }
+        lines.forEach { if (it.pinId == id) it.pinId = null }
+        savePins()
+        renderQuick(); drawHistory()
+    }
 
     val view: View = ScrollView(a).apply {
         addView(ui.column().apply {
             setPadding(ui.dp(16), ui.dp(16), ui.dp(16), ui.dp(24))
             addView(ui.title("Speak"))
+            quickWrap.visibility = View.GONE
+            quickWrap.addView(ui.body("⚡ Quick lines", 12f, R.color.brass), ui.fill(4))
+            quickWrap.addView(HorizontalScrollView(a).apply { addView(quickRow); isHorizontalScrollBarEnabled = false }, ui.fill(8))
+            addView(quickWrap)
             addView(ui.body("Whose voice?"), ui.fill(4))
             addView(HorizontalScrollView(a).apply { addView(voiceRow); isHorizontalScrollBarEnabled = false }, ui.fill(10))
             addView(input, ui.fill(8))
-            addView(ui.button("🦜  Say it", Ui.Kind.PRIMARY) { say() }, ui.fill(10))
+            val sayRow = ui.row()
+            sayRow.addView(ui.button("🦜  Say it", Ui.Kind.PRIMARY) { say() }, LinearLayout.LayoutParams(0, -2, 1f).apply { rightMargin = ui.dp(8) })
+            sayRow.addView(ui.button("＋ Add") { addMenu() }, ui.wrap(0))
+            addView(sayRow, ui.fill(10))
+            addView(ui.body("Drop sounds into a line with brackets: Pay up [coins] or else."), ui.fill(8))
             addView(ui.body("How to mimic:"), ui.fill(4))
             addView(HorizontalScrollView(a).apply { addView(howRow); isHorizontalScrollBarEnabled = false }, ui.fill(8))
+            addView(ui.body("Voice effect:"), ui.fill(4))
+            addView(HorizontalScrollView(a).apply { addView(effectRow); isHorizontalScrollBarEnabled = false }, ui.fill(8))
             addView(ui.body("When stitching, for words they never said:"), ui.fill(4))
             addView(HorizontalScrollView(a).apply { addView(modeRow); isHorizontalScrollBarEnabled = false }, ui.fill(12))
             addView(result, ui.fill(4))
@@ -59,6 +114,64 @@ class SpeakTab(private val a: MainActivity) {
             addView(ui.heading("Said before"), ui.fill(6))
             addView(history)
         })
+        loadPins()
+        a.main.post { renderQuick() }
+    }
+
+    /** Insert text (a [sound tag] or phrase) at the cursor. */
+    fun insert(text: String) {
+        val pos = input.selectionStart.coerceAtLeast(0)
+        val cur = input.text.toString()
+        val pad = if (pos > 0 && !cur[pos - 1].isWhitespace()) " " else ""
+        input.text.insert(pos, "$pad$text ")
+        input.requestFocus()
+    }
+
+    /** The ＋ Add button: a ready-made phrase or a sound effect. */
+    private fun addMenu() {
+        android.app.AlertDialog.Builder(a)
+            .setItems(arrayOf("📜  A phrase from the phrasebook", "🔔  A sound effect")) { _, i -> if (i == 0) pickPhrase() else pickSound() }
+            .show()
+    }
+
+    private fun pickPhrase() {
+        val sections = Phrasebook.sections
+        android.app.AlertDialog.Builder(a).setTitle("📜 Phrasebook")
+            .setItems(sections.map { it.first }.toTypedArray()) { _, i ->
+                val (title, phrases) = sections[i]
+                android.app.AlertDialog.Builder(a).setTitle(title)
+                    .setItems(phrases.map { "“$it”" }.toTypedArray()) { _, j -> insert(phrases[j]) }
+                    .setNegativeButton("Back") { _, _ -> pickPhrase() }
+                    .show()
+            }.show()
+    }
+
+    /** Pick a category (any sound from it) or a specific sound; inserts a [tag] at the cursor. */
+    private fun pickSound() {
+        val cats = listOf(SfxCategory(MimicStore.CATEGORY, "My Mimicry", "🦜", "", MimicStore.list(a))) + SfxLibrary.categories(a)
+        android.app.AlertDialog.Builder(a).setTitle("🔔 Sounds")
+            .setItems(cats.map { "${it.icon} ${it.title}" }.toTypedArray()) { _, i ->
+                val c = cats[i]
+                if (c.sounds.isEmpty()) { a.toast("Nothing recorded there yet."); return@setItems }
+                val labels = listOf("🎲 Any ${c.title} sound") + c.sounds.map { it.label }
+                android.app.AlertDialog.Builder(a).setTitle("${c.icon} ${c.title}")
+                    .setItems(labels.toTypedArray()) { _, j -> insert("[${if (j == 0) c.key else c.sounds[j - 1].label}]") }
+                    .setNegativeButton("Back") { _, _ -> pickSound() }
+                    .show()
+            }.show()
+    }
+
+    private fun renderQuick() {
+        quickRow.removeAllViews()
+        quickWrap.visibility = if (pins.isEmpty()) View.GONE else View.VISIBLE
+        for (p in pins) {
+            val label = if (p.text.length > 24) p.text.take(23) + "…" else p.text
+            quickRow.addView(ui.button("▶ $label") {
+                a.work({ AudioIO.decodeFile(java.io.File(pinDir, p.id + ".wav").absolutePath) }) { r ->
+                    r.onSuccess { AudioIO.play(it) }
+                }
+            }.apply { setOnLongClickListener { unpin(p.id); true } }, ui.wrap())
+        }
     }
 
     fun refresh() {
@@ -70,6 +183,10 @@ class SpeakTab(private val a: MainActivity) {
         howRow.removeAllViews()
         listOf("mimic" to "Every sound (smooth)", "stitch" to "Their exact words")
             .forEach { (h, label) -> howRow.addView(chip(label, h == how) { how = h; refresh() }, ui.wrap()) }
+        effectRow.removeAllViews()
+        LineEffect.choices.forEach { (k, label) ->
+            effectRow.addView(chip(label, k == effect) { effect = k; a.prefs.edit().putString("effect", k).apply(); refresh() }, ui.wrap())
+        }
         modeRow.removeAllViews()
         listOf(Synth.Fallback.AUTO to "Fill gaps", Synth.Fallback.PHONES to "Their sounds only", Synth.Fallback.SILENT to "Skip them")
             .forEach { (m, label) -> modeRow.addView(chip(label, m == mode) { mode = m; refresh() }, ui.wrap()) }
@@ -85,12 +202,45 @@ class SpeakTab(private val a: MainActivity) {
         ui.tick(input)
         a.setStatus("Mimicking ${v.name}…")
         val opts = Synth.Opts(fallback = mode)
+        val fxKey = effect
         a.work({
-            if (how == "mimic") {
-                val x = a.engine.sayMimic(v, text)
-                if (x != null && x.isNotEmpty()) x to Synth.Report(com.kenku.mimic.engine.TextNorm.words(text).map { it to Synth.Source.NEURAL }, 0)
-                else a.engine.synth.speak(v, text, opts)
-            } else a.engine.synth.speak(v, text, opts)
+            // split the line at [sound tags]: speech between them, the sounds dropped in place
+            val gap = FloatArray(com.kenku.mimic.engine.Dsp.SR * 3 / 20)      // 150 ms
+            val pieces = ArrayList<FloatArray>()
+            val words = ArrayList<Pair<String, Synth.Source>>()
+            var patched = 0
+            var spoke = false
+            for (m in Regex("\\[([^\\]]+)\\]|[^\\[]+").findAll(text)) {
+                val tag = m.groups[1]?.value
+                if (tag != null) {
+                    val s = SfxLibrary.find(a, tag) ?: continue
+                    val au = try {
+                        if (s.isUserFile) AudioIO.decodeFile(s.file) else AudioIO.decodeAsset(a, s.file)
+                    } catch (e: Throwable) { continue }
+                    if (pieces.isNotEmpty()) pieces += gap
+                    pieces += au
+                } else {
+                    val part = m.value.trim()
+                    if (part.isEmpty() || com.kenku.mimic.engine.TextNorm.words(part).isEmpty()) continue
+                    val (au, rep) = if (how == "mimic") {
+                        val x = a.engine.sayMimic(v, part)
+                        if (x != null && x.isNotEmpty()) x to Synth.Report(com.kenku.mimic.engine.TextNorm.words(part).map { it to Synth.Source.NEURAL }, 0)
+                        else a.engine.synth.speak(v, part, opts)
+                    } else a.engine.synth.speak(v, part, opts)
+                    if (pieces.isNotEmpty()) pieces += gap
+                    pieces += au
+                    words += rep.words
+                    patched += rep.patched
+                    spoke = true
+                }
+            }
+            if (pieces.isEmpty()) throw IllegalArgumentException("Nothing to say — no words and no matching sounds.")
+            var audio = FloatArray(pieces.sumOf { it.size })
+            var p = 0
+            for (c in pieces) { System.arraycopy(c, 0, audio, p, c.size); p += c.size }
+            val fx = LineEffect(fxKey)
+            if (fx.active) audio = fx.process(audio) + fx.tail()   // the tail is the echo ringing on
+            audio to Synth.Report(if (spoke) words else com.kenku.mimic.engine.TextNorm.words(text).map { it to Synth.Source.NEURAL }, patched)
         }) { r ->
             a.setStatus(null)
             r.onSuccess { (audio, rep) ->
@@ -137,6 +287,7 @@ class SpeakTab(private val a: MainActivity) {
             c.addView(ui.body("as ${l.voice}", 12f), ui.fill(6))
             val row = ui.row()
             row.addView(ui.button("▶ Again") { AudioIO.play(l.audio) }, ui.wrap())
+            row.addView(ui.button(if (l.pinId == null) "⚡ Pin" else "Unpin") { l.pinId?.let { unpin(it) } ?: pin(l) }, ui.wrap())
             row.addView(ui.button("Edit") { input.setText(l.text); input.setSelection(l.text.length) }, ui.wrap())
             row.addView(ui.button("Share", Ui.Kind.QUIET) { share(l) }, ui.wrap())
             c.addView(row)

@@ -1,0 +1,2894 @@
+{
+ "categories": [
+  {
+   "key": "doors",
+   "title": "Doors & Locks",
+   "icon": "🚪",
+   "desc": "Doors, gates, keys, locks and chests",
+   "sounds": [
+    {
+     "id": "doors_001",
+     "label": "Door opens 1",
+     "file": "sfx/doors/doors_001.ogg",
+     "dur": 0.92
+    },
+    {
+     "id": "doors_002",
+     "label": "Door opens 2",
+     "file": "sfx/doors/doors_002.ogg",
+     "dur": 1.41
+    },
+    {
+     "id": "doors_003",
+     "label": "Door shuts 1",
+     "file": "sfx/doors/doors_003.ogg",
+     "dur": 0.68
+    },
+    {
+     "id": "doors_004",
+     "label": "Door shuts 2",
+     "file": "sfx/doors/doors_004.ogg",
+     "dur": 0.61
+    },
+    {
+     "id": "doors_005",
+     "label": "Door shuts 3",
+     "file": "sfx/doors/doors_005.ogg",
+     "dur": 0.71
+    },
+    {
+     "id": "doors_006",
+     "label": "Creaky old door 1",
+     "file": "sfx/doors/doors_006.ogg",
+     "dur": 2.78
+    },
+    {
+     "id": "doors_007",
+     "label": "Creaky old door 2",
+     "file": "sfx/doors/doors_007.ogg",
+     "dur": 2.64
+    },
+    {
+     "id": "doors_008",
+     "label": "Door opens quickly",
+     "file": "sfx/doors/doors_008.ogg",
+     "dur": 0.45
+    },
+    {
+     "id": "doors_009",
+     "label": "Door closes 1",
+     "file": "sfx/doors/doors_009.ogg",
+     "dur": 0.5
+    },
+    {
+     "id": "doors_010",
+     "label": "Door closes 2",
+     "file": "sfx/doors/doors_010.ogg",
+     "dur": 0.86
+    },
+    {
+     "id": "doors_011",
+     "label": "Door closes 3",
+     "file": "sfx/doors/doors_011.ogg",
+     "dur": 0.42
+    },
+    {
+     "id": "doors_012",
+     "label": "Door slams 1",
+     "file": "sfx/doors/doors_012.ogg",
+     "dur": 0.47
+    },
+    {
+     "id": "doors_013",
+     "label": "Door slams 2",
+     "file": "sfx/doors/doors_013.ogg",
+     "dur": 0.64
+    },
+    {
+     "id": "doors_014",
+     "label": "Door slams 3",
+     "file": "sfx/doors/doors_014.ogg",
+     "dur": 0.56
+    },
+    {
+     "id": "doors_015",
+     "label": "Heavy door",
+     "file": "sfx/doors/doors_015.ogg",
+     "dur": 1.0
+    },
+    {
+     "id": "doors_016",
+     "label": "Iron gate opens",
+     "file": "sfx/doors/doors_016.ogg",
+     "dur": 1.15
+    },
+    {
+     "id": "doors_017",
+     "label": "Iron gate closes",
+     "file": "sfx/doors/doors_017.ogg",
+     "dur": 0.87
+    },
+    {
+     "id": "doors_018",
+     "label": "Stone door grinds",
+     "file": "sfx/doors/doors_018.ogg",
+     "dur": 0.53
+    },
+    {
+     "id": "doors_019",
+     "label": "Treasure chest opens",
+     "file": "sfx/doors/doors_019.ogg",
+     "dur": 2.53
+    },
+    {
+     "id": "doors_020",
+     "label": "Wooden box opens",
+     "file": "sfx/doors/doors_020.ogg",
+     "dur": 0.37
+    },
+    {
+     "id": "doors_021",
+     "label": "Drawer opens",
+     "file": "sfx/doors/doors_021.ogg",
+     "dur": 1.61
+    },
+    {
+     "id": "doors_022",
+     "label": "Drawer closes",
+     "file": "sfx/doors/doors_022.ogg",
+     "dur": 0.72
+    },
+    {
+     "id": "doors_023",
+     "label": "Key slides into lock 1",
+     "file": "sfx/doors/doors_023.ogg",
+     "dur": 0.87
+    },
+    {
+     "id": "doors_024",
+     "label": "Key slides into lock 2",
+     "file": "sfx/doors/doors_024.ogg",
+     "dur": 0.63
+    },
+    {
+     "id": "doors_025",
+     "label": "Lock clicks open 1",
+     "file": "sfx/doors/doors_025.ogg",
+     "dur": 0.74
+    },
+    {
+     "id": "doors_026",
+     "label": "Lock clicks open 2",
+     "file": "sfx/doors/doors_026.ogg",
+     "dur": 1.71
+    },
+    {
+     "id": "doors_027",
+     "label": "Lock clicks open 3",
+     "file": "sfx/doors/doors_027.ogg",
+     "dur": 1.76
+    },
+    {
+     "id": "doors_028",
+     "label": "Key turns 1",
+     "file": "sfx/doors/doors_028.ogg",
+     "dur": 0.43
+    },
+    {
+     "id": "doors_029",
+     "label": "Key turns 2",
+     "file": "sfx/doors/doors_029.ogg",
+     "dur": 0.34
+    },
+    {
+     "id": "doors_030",
+     "label": "Key ring rattles 1",
+     "file": "sfx/doors/doors_030.ogg",
+     "dur": 1.44
+    },
+    {
+     "id": "doors_031",
+     "label": "Key ring rattles 2",
+     "file": "sfx/doors/doors_031.ogg",
+     "dur": 0.93
+    },
+    {
+     "id": "doors_032",
+     "label": "Key ring rattles 3",
+     "file": "sfx/doors/doors_032.ogg",
+     "dur": 0.85
+    },
+    {
+     "id": "doors_033",
+     "label": "Keys jingle 1",
+     "file": "sfx/doors/doors_033.ogg",
+     "dur": 0.41
+    },
+    {
+     "id": "doors_034",
+     "label": "Keys jingle 2",
+     "file": "sfx/doors/doors_034.ogg",
+     "dur": 0.46
+    },
+    {
+     "id": "doors_035",
+     "label": "Keys jingle 3",
+     "file": "sfx/doors/doors_035.ogg",
+     "dur": 0.48
+    },
+    {
+     "id": "doors_036",
+     "label": "Lock and latch 1",
+     "file": "sfx/doors/doors_036.ogg",
+     "dur": 2.64
+    },
+    {
+     "id": "doors_037",
+     "label": "Lock and latch 2",
+     "file": "sfx/doors/doors_037.ogg",
+     "dur": 0.95
+    },
+    {
+     "id": "doors_038",
+     "label": "Lock and latch 3",
+     "file": "sfx/doors/doors_038.ogg",
+     "dur": 0.98
+    },
+    {
+     "id": "doors_039",
+     "label": "Lock and latch 4",
+     "file": "sfx/doors/doors_039.ogg",
+     "dur": 0.6
+    },
+    {
+     "id": "doors_040",
+     "label": "Lock and latch 5",
+     "file": "sfx/doors/doors_040.ogg",
+     "dur": 0.98
+    },
+    {
+     "id": "doors_041",
+     "label": "Lock and latch 6",
+     "file": "sfx/doors/doors_041.ogg",
+     "dur": 0.66
+    },
+    {
+     "id": "doors_042",
+     "label": "Shackles lock 1",
+     "file": "sfx/doors/doors_042.ogg",
+     "dur": 0.6
+    },
+    {
+     "id": "doors_043",
+     "label": "Shackles lock 2",
+     "file": "sfx/doors/doors_043.ogg",
+     "dur": 0.79
+    },
+    {
+     "id": "doors_044",
+     "label": "Shackles open",
+     "file": "sfx/doors/doors_044.ogg",
+     "dur": 0.94
+    },
+    {
+     "id": "doors_045",
+     "label": "Metal latch",
+     "file": "sfx/doors/doors_045.ogg",
+     "dur": 0.26
+    }
+   ]
+  },
+  {
+   "key": "creaks",
+   "title": "Creaks & Wood",
+   "icon": "🪵",
+   "desc": "Creaking boards, wood knocks and breaks",
+   "sounds": [
+    {
+     "id": "creaks_001",
+     "label": "Creak 1",
+     "file": "sfx/creaks/creaks_001.ogg",
+     "dur": 0.66
+    },
+    {
+     "id": "creaks_002",
+     "label": "Creak 2",
+     "file": "sfx/creaks/creaks_002.ogg",
+     "dur": 0.83
+    },
+    {
+     "id": "creaks_003",
+     "label": "Creak 3",
+     "file": "sfx/creaks/creaks_003.ogg",
+     "dur": 0.34
+    },
+    {
+     "id": "creaks_004",
+     "label": "Floorboard creaks",
+     "file": "sfx/creaks/creaks_004.ogg",
+     "dur": 0.65
+    },
+    {
+     "id": "creaks_005",
+     "label": "Wood squeaks 1",
+     "file": "sfx/creaks/creaks_005.ogg",
+     "dur": 0.48
+    },
+    {
+     "id": "creaks_006",
+     "label": "Wood squeaks 2",
+     "file": "sfx/creaks/creaks_006.ogg",
+     "dur": 0.39
+    },
+    {
+     "id": "creaks_007",
+     "label": "Winch creaks 1",
+     "file": "sfx/creaks/creaks_007.ogg",
+     "dur": 3.64
+    },
+    {
+     "id": "creaks_008",
+     "label": "Winch creaks 2",
+     "file": "sfx/creaks/creaks_008.ogg",
+     "dur": 1.81
+    },
+    {
+     "id": "creaks_009",
+     "label": "Winch creaks 3",
+     "file": "sfx/creaks/creaks_009.ogg",
+     "dur": 1.83
+    },
+    {
+     "id": "creaks_010",
+     "label": "Winch creaks 4",
+     "file": "sfx/creaks/creaks_010.ogg",
+     "dur": 1.95
+    },
+    {
+     "id": "creaks_011",
+     "label": "Knock on wood 1",
+     "file": "sfx/creaks/creaks_011.ogg",
+     "dur": 0.34
+    },
+    {
+     "id": "creaks_012",
+     "label": "Knock on wood 2",
+     "file": "sfx/creaks/creaks_012.ogg",
+     "dur": 0.39
+    },
+    {
+     "id": "creaks_013",
+     "label": "Knock on wood 3",
+     "file": "sfx/creaks/creaks_013.ogg",
+     "dur": 0.41
+    },
+    {
+     "id": "creaks_014",
+     "label": "Knock on wood 4",
+     "file": "sfx/creaks/creaks_014.ogg",
+     "dur": 0.3
+    },
+    {
+     "id": "creaks_015",
+     "label": "Wood cracks 1",
+     "file": "sfx/creaks/creaks_015.ogg",
+     "dur": 0.18
+    },
+    {
+     "id": "creaks_016",
+     "label": "Wood cracks 2",
+     "file": "sfx/creaks/creaks_016.ogg",
+     "dur": 0.25
+    },
+    {
+     "id": "creaks_017",
+     "label": "Wood cracks 3",
+     "file": "sfx/creaks/creaks_017.ogg",
+     "dur": 0.31
+    },
+    {
+     "id": "creaks_018",
+     "label": "Wood breaks 1",
+     "file": "sfx/creaks/creaks_018.ogg",
+     "dur": 0.56
+    },
+    {
+     "id": "creaks_019",
+     "label": "Wood breaks 2",
+     "file": "sfx/creaks/creaks_019.ogg",
+     "dur": 0.57
+    },
+    {
+     "id": "creaks_020",
+     "label": "Plank snaps 1",
+     "file": "sfx/creaks/creaks_020.ogg",
+     "dur": 0.3
+    },
+    {
+     "id": "creaks_021",
+     "label": "Plank snaps 2",
+     "file": "sfx/creaks/creaks_021.ogg",
+     "dur": 0.25
+    },
+    {
+     "id": "creaks_022",
+     "label": "Plank snaps 3",
+     "file": "sfx/creaks/creaks_022.ogg",
+     "dur": 0.49
+    },
+    {
+     "id": "creaks_023",
+     "label": "Wood clatters 1",
+     "file": "sfx/creaks/creaks_023.ogg",
+     "dur": 0.64
+    },
+    {
+     "id": "creaks_024",
+     "label": "Wood clatters 2",
+     "file": "sfx/creaks/creaks_024.ogg",
+     "dur": 0.48
+    },
+    {
+     "id": "creaks_025",
+     "label": "Wood clatters 3",
+     "file": "sfx/creaks/creaks_025.ogg",
+     "dur": 0.46
+    },
+    {
+     "id": "creaks_026",
+     "label": "Wooden slam 1",
+     "file": "sfx/creaks/creaks_026.ogg",
+     "dur": 0.38
+    },
+    {
+     "id": "creaks_027",
+     "label": "Wooden slam 2",
+     "file": "sfx/creaks/creaks_027.ogg",
+     "dur": 0.48
+    },
+    {
+     "id": "creaks_028",
+     "label": "Twig snaps 1",
+     "file": "sfx/creaks/creaks_028.ogg",
+     "dur": 0.4
+    },
+    {
+     "id": "creaks_029",
+     "label": "Twig snaps 2",
+     "file": "sfx/creaks/creaks_029.ogg",
+     "dur": 0.76
+    },
+    {
+     "id": "creaks_030",
+     "label": "Wood tap 1",
+     "file": "sfx/creaks/creaks_030.ogg",
+     "dur": 0.37
+    },
+    {
+     "id": "creaks_031",
+     "label": "Wood tap 2",
+     "file": "sfx/creaks/creaks_031.ogg",
+     "dur": 0.4
+    },
+    {
+     "id": "creaks_032",
+     "label": "Wood tap 3",
+     "file": "sfx/creaks/creaks_032.ogg",
+     "dur": 0.43
+    }
+   ]
+  },
+  {
+   "key": "coins",
+   "title": "Coins & Treasure",
+   "icon": "💰",
+   "desc": "Coin purses, clinks, gems and loot",
+   "sounds": [
+    {
+     "id": "coins_001",
+     "label": "Coin purse 1",
+     "file": "sfx/coins/coins_001.ogg",
+     "dur": 0.85
+    },
+    {
+     "id": "coins_002",
+     "label": "Coin purse 2",
+     "file": "sfx/coins/coins_002.ogg",
+     "dur": 0.34
+    },
+    {
+     "id": "coins_003",
+     "label": "Coin pouch shakes 1",
+     "file": "sfx/coins/coins_003.ogg",
+     "dur": 1.19
+    },
+    {
+     "id": "coins_004",
+     "label": "Coin pouch shakes 2",
+     "file": "sfx/coins/coins_004.ogg",
+     "dur": 1.04
+    },
+    {
+     "id": "coins_005",
+     "label": "Coin pouch shakes 3",
+     "file": "sfx/coins/coins_005.ogg",
+     "dur": 1.16
+    },
+    {
+     "id": "coins_006",
+     "label": "Coin pouch shakes 4",
+     "file": "sfx/coins/coins_006.ogg",
+     "dur": 0.98
+    },
+    {
+     "id": "coins_007",
+     "label": "Pouch jingles 1",
+     "file": "sfx/coins/coins_007.ogg",
+     "dur": 0.48
+    },
+    {
+     "id": "coins_008",
+     "label": "Pouch jingles 2",
+     "file": "sfx/coins/coins_008.ogg",
+     "dur": 0.45
+    },
+    {
+     "id": "coins_009",
+     "label": "Coins clink 1",
+     "file": "sfx/coins/coins_009.ogg",
+     "dur": 0.41
+    },
+    {
+     "id": "coins_010",
+     "label": "Coins clink 2",
+     "file": "sfx/coins/coins_010.ogg",
+     "dur": 0.62
+    },
+    {
+     "id": "coins_011",
+     "label": "Coins clink 3",
+     "file": "sfx/coins/coins_011.ogg",
+     "dur": 0.48
+    },
+    {
+     "id": "coins_012",
+     "label": "Coins clink 4",
+     "file": "sfx/coins/coins_012.ogg",
+     "dur": 1.61
+    },
+    {
+     "id": "coins_013",
+     "label": "Coins drop 1",
+     "file": "sfx/coins/coins_013.ogg",
+     "dur": 0.6
+    },
+    {
+     "id": "coins_014",
+     "label": "Coins drop 2",
+     "file": "sfx/coins/coins_014.ogg",
+     "dur": 1.0
+    },
+    {
+     "id": "coins_015",
+     "label": "Coins drop 3",
+     "file": "sfx/coins/coins_015.ogg",
+     "dur": 0.31
+    },
+    {
+     "id": "coins_016",
+     "label": "Counting coins 1",
+     "file": "sfx/coins/coins_016.ogg",
+     "dur": 0.78
+    },
+    {
+     "id": "coins_017",
+     "label": "Counting coins 2",
+     "file": "sfx/coins/coins_017.ogg",
+     "dur": 0.25
+    },
+    {
+     "id": "coins_018",
+     "label": "Counting coins 3",
+     "file": "sfx/coins/coins_018.ogg",
+     "dur": 0.62
+    },
+    {
+     "id": "coins_019",
+     "label": "Counting coins 4",
+     "file": "sfx/coins/coins_019.ogg",
+     "dur": 0.53
+    },
+    {
+     "id": "coins_020",
+     "label": "Counting coins 5",
+     "file": "sfx/coins/coins_020.ogg",
+     "dur": 0.36
+    },
+    {
+     "id": "coins_021",
+     "label": "Counting coins 6",
+     "file": "sfx/coins/coins_021.ogg",
+     "dur": 0.54
+    },
+    {
+     "id": "coins_022",
+     "label": "Counting coins 7",
+     "file": "sfx/coins/coins_022.ogg",
+     "dur": 0.24
+    },
+    {
+     "id": "coins_023",
+     "label": "Counting coins 8",
+     "file": "sfx/coins/coins_023.ogg",
+     "dur": 0.26
+    },
+    {
+     "id": "coins_024",
+     "label": "Coin flip 1",
+     "file": "sfx/coins/coins_024.ogg",
+     "dur": 0.35
+    },
+    {
+     "id": "coins_025",
+     "label": "Coin flip 2",
+     "file": "sfx/coins/coins_025.ogg",
+     "dur": 0.24
+    },
+    {
+     "id": "coins_026",
+     "label": "Coin flip 3",
+     "file": "sfx/coins/coins_026.ogg",
+     "dur": 0.46
+    },
+    {
+     "id": "coins_027",
+     "label": "Coin spins and falls 1",
+     "file": "sfx/coins/coins_027.ogg",
+     "dur": 1.43
+    },
+    {
+     "id": "coins_028",
+     "label": "Coin spins and falls 2",
+     "file": "sfx/coins/coins_028.ogg",
+     "dur": 3.51
+    },
+    {
+     "id": "coins_029",
+     "label": "Coin spins and falls 3",
+     "file": "sfx/coins/coins_029.ogg",
+     "dur": 4.19
+    },
+    {
+     "id": "coins_030",
+     "label": "Gem sparkles 1",
+     "file": "sfx/coins/coins_030.ogg",
+     "dur": 0.25
+    },
+    {
+     "id": "coins_031",
+     "label": "Gem sparkles 2",
+     "file": "sfx/coins/coins_031.ogg",
+     "dur": 0.2
+    },
+    {
+     "id": "coins_032",
+     "label": "Gem sparkles 3",
+     "file": "sfx/coins/coins_032.ogg",
+     "dur": 0.29
+    },
+    {
+     "id": "coins_033",
+     "label": "Gem sparkles 4",
+     "file": "sfx/coins/coins_033.ogg",
+     "dur": 0.59
+    },
+    {
+     "id": "coins_034",
+     "label": "Beads",
+     "file": "sfx/coins/coins_034.ogg",
+     "dur": 0.5
+    },
+    {
+     "id": "coins_035",
+     "label": "Small clink 1",
+     "file": "sfx/coins/coins_035.ogg",
+     "dur": 0.31
+    },
+    {
+     "id": "coins_036",
+     "label": "Small clink 2",
+     "file": "sfx/coins/coins_036.ogg",
+     "dur": 0.26
+    },
+    {
+     "id": "coins_037",
+     "label": "Small clink 3",
+     "file": "sfx/coins/coins_037.ogg",
+     "dur": 0.29
+    }
+   ]
+  },
+  {
+   "key": "tavern",
+   "title": "Tavern & Food",
+   "icon": "🍺",
+   "desc": "Drinks, dishes, dice and dining",
+   "sounds": [
+    {
+     "id": "tavern_001",
+     "label": "Gulp a drink 1",
+     "file": "sfx/tavern/tavern_001.ogg",
+     "dur": 0.5
+    },
+    {
+     "id": "tavern_002",
+     "label": "Gulp a drink 2",
+     "file": "sfx/tavern/tavern_002.ogg",
+     "dur": 0.44
+    },
+    {
+     "id": "tavern_003",
+     "label": "Gulp a drink 3",
+     "file": "sfx/tavern/tavern_003.ogg",
+     "dur": 0.45
+    },
+    {
+     "id": "tavern_004",
+     "label": "Gulp a drink 4",
+     "file": "sfx/tavern/tavern_004.ogg",
+     "dur": 0.45
+    },
+    {
+     "id": "tavern_005",
+     "label": "Gulp a drink 5",
+     "file": "sfx/tavern/tavern_005.ogg",
+     "dur": 1.83
+    },
+    {
+     "id": "tavern_006",
+     "label": "Gulp a drink 6",
+     "file": "sfx/tavern/tavern_006.ogg",
+     "dur": 0.9
+    },
+    {
+     "id": "tavern_007",
+     "label": "Pour a drink",
+     "file": "sfx/tavern/tavern_007.ogg",
+     "dur": 1.61
+    },
+    {
+     "id": "tavern_008",
+     "label": "Glass clinks 1",
+     "file": "sfx/tavern/tavern_008.ogg",
+     "dur": 0.39
+    },
+    {
+     "id": "tavern_009",
+     "label": "Glass clinks 2",
+     "file": "sfx/tavern/tavern_009.ogg",
+     "dur": 0.37
+    },
+    {
+     "id": "tavern_010",
+     "label": "Glass clinks 3",
+     "file": "sfx/tavern/tavern_010.ogg",
+     "dur": 0.41
+    },
+    {
+     "id": "tavern_011",
+     "label": "Glass clinks 4",
+     "file": "sfx/tavern/tavern_011.ogg",
+     "dur": 0.96
+    },
+    {
+     "id": "tavern_012",
+     "label": "Glass clinks 5",
+     "file": "sfx/tavern/tavern_012.ogg",
+     "dur": 1.03
+    },
+    {
+     "id": "tavern_013",
+     "label": "Uncork a bottle 1",
+     "file": "sfx/tavern/tavern_013.ogg",
+     "dur": 0.48
+    },
+    {
+     "id": "tavern_014",
+     "label": "Uncork a bottle 2",
+     "file": "sfx/tavern/tavern_014.ogg",
+     "dur": 0.6
+    },
+    {
+     "id": "tavern_015",
+     "label": "Uncork a bottle 3",
+     "file": "sfx/tavern/tavern_015.ogg",
+     "dur": 0.62
+    },
+    {
+     "id": "tavern_016",
+     "label": "Uncork a clay jug 1",
+     "file": "sfx/tavern/tavern_016.ogg",
+     "dur": 0.37
+    },
+    {
+     "id": "tavern_017",
+     "label": "Uncork a clay jug 2",
+     "file": "sfx/tavern/tavern_017.ogg",
+     "dur": 0.61
+    },
+    {
+     "id": "tavern_018",
+     "label": "Mug set down",
+     "file": "sfx/tavern/tavern_018.ogg",
+     "dur": 0.38
+    },
+    {
+     "id": "tavern_019",
+     "label": "Fork on plate 1",
+     "file": "sfx/tavern/tavern_019.ogg",
+     "dur": 0.26
+    },
+    {
+     "id": "tavern_020",
+     "label": "Fork on plate 2",
+     "file": "sfx/tavern/tavern_020.ogg",
+     "dur": 0.17
+    },
+    {
+     "id": "tavern_021",
+     "label": "Fork on plate 3",
+     "file": "sfx/tavern/tavern_021.ogg",
+     "dur": 0.38
+    },
+    {
+     "id": "tavern_022",
+     "label": "Cutlery drops",
+     "file": "sfx/tavern/tavern_022.ogg",
+     "dur": 1.42
+    },
+    {
+     "id": "tavern_023",
+     "label": "Dishes rattle 1",
+     "file": "sfx/tavern/tavern_023.ogg",
+     "dur": 0.79
+    },
+    {
+     "id": "tavern_024",
+     "label": "Dishes rattle 2",
+     "file": "sfx/tavern/tavern_024.ogg",
+     "dur": 0.61
+    },
+    {
+     "id": "tavern_025",
+     "label": "Dishes rattle 3",
+     "file": "sfx/tavern/tavern_025.ogg",
+     "dur": 0.73
+    },
+    {
+     "id": "tavern_026",
+     "label": "Dishes rattle 4",
+     "file": "sfx/tavern/tavern_026.ogg",
+     "dur": 0.61
+    },
+    {
+     "id": "tavern_027",
+     "label": "Iron pot 1",
+     "file": "sfx/tavern/tavern_027.ogg",
+     "dur": 1.46
+    },
+    {
+     "id": "tavern_028",
+     "label": "Iron pot 2",
+     "file": "sfx/tavern/tavern_028.ogg",
+     "dur": 0.94
+    },
+    {
+     "id": "tavern_029",
+     "label": "Iron pot 3",
+     "file": "sfx/tavern/tavern_029.ogg",
+     "dur": 0.91
+    },
+    {
+     "id": "tavern_030",
+     "label": "Bowl and spoon 1",
+     "file": "sfx/tavern/tavern_030.ogg",
+     "dur": 0.8
+    },
+    {
+     "id": "tavern_031",
+     "label": "Bowl and spoon 2",
+     "file": "sfx/tavern/tavern_031.ogg",
+     "dur": 0.6
+    },
+    {
+     "id": "tavern_032",
+     "label": "Slice an apple 1",
+     "file": "sfx/tavern/tavern_032.ogg",
+     "dur": 0.57
+    },
+    {
+     "id": "tavern_033",
+     "label": "Slice an apple 2",
+     "file": "sfx/tavern/tavern_033.ogg",
+     "dur": 0.6
+    },
+    {
+     "id": "tavern_034",
+     "label": "Crunch and chew 1",
+     "file": "sfx/tavern/tavern_034.ogg",
+     "dur": 1.46
+    },
+    {
+     "id": "tavern_035",
+     "label": "Crunch and chew 2",
+     "file": "sfx/tavern/tavern_035.ogg",
+     "dur": 1.1
+    },
+    {
+     "id": "tavern_036",
+     "label": "Crunch and chew 3",
+     "file": "sfx/tavern/tavern_036.ogg",
+     "dur": 0.85
+    },
+    {
+     "id": "tavern_037",
+     "label": "Crunch and chew 4",
+     "file": "sfx/tavern/tavern_037.ogg",
+     "dur": 0.68
+    },
+    {
+     "id": "tavern_038",
+     "label": "Burp",
+     "file": "sfx/tavern/tavern_038.ogg",
+     "dur": 1.21
+    },
+    {
+     "id": "tavern_039",
+     "label": "Belch 1",
+     "file": "sfx/tavern/tavern_039.ogg",
+     "dur": 0.69
+    },
+    {
+     "id": "tavern_040",
+     "label": "Belch 2",
+     "file": "sfx/tavern/tavern_040.ogg",
+     "dur": 0.82
+    },
+    {
+     "id": "tavern_041",
+     "label": "Roll dice 1",
+     "file": "sfx/tavern/tavern_041.ogg",
+     "dur": 0.75
+    },
+    {
+     "id": "tavern_042",
+     "label": "Roll dice 2",
+     "file": "sfx/tavern/tavern_042.ogg",
+     "dur": 0.81
+    },
+    {
+     "id": "tavern_043",
+     "label": "Roll dice 3",
+     "file": "sfx/tavern/tavern_043.ogg",
+     "dur": 0.97
+    },
+    {
+     "id": "tavern_044",
+     "label": "Roll a handful of dice 1",
+     "file": "sfx/tavern/tavern_044.ogg",
+     "dur": 1.27
+    },
+    {
+     "id": "tavern_045",
+     "label": "Roll a handful of dice 2",
+     "file": "sfx/tavern/tavern_045.ogg",
+     "dur": 1.59
+    },
+    {
+     "id": "tavern_046",
+     "label": "Shake dice cup 1",
+     "file": "sfx/tavern/tavern_046.ogg",
+     "dur": 0.77
+    },
+    {
+     "id": "tavern_047",
+     "label": "Shake dice cup 2",
+     "file": "sfx/tavern/tavern_047.ogg",
+     "dur": 1.09
+    },
+    {
+     "id": "tavern_048",
+     "label": "Stew pot boils",
+     "file": "sfx/tavern/tavern_048.ogg",
+     "dur": 4.49
+    },
+    {
+     "id": "tavern_049",
+     "label": "Kitchen clatter 1",
+     "file": "sfx/tavern/tavern_049.ogg",
+     "dur": 0.7
+    },
+    {
+     "id": "tavern_050",
+     "label": "Kitchen clatter 2",
+     "file": "sfx/tavern/tavern_050.ogg",
+     "dur": 0.46
+    },
+    {
+     "id": "tavern_051",
+     "label": "Kitchen clatter 3",
+     "file": "sfx/tavern/tavern_051.ogg",
+     "dur": 0.4
+    },
+    {
+     "id": "tavern_052",
+     "label": "Kitchen clatter 4",
+     "file": "sfx/tavern/tavern_052.ogg",
+     "dur": 1.58
+    },
+    {
+     "id": "tavern_053",
+     "label": "Kitchen clatter 5",
+     "file": "sfx/tavern/tavern_053.ogg",
+     "dur": 0.74
+    },
+    {
+     "id": "tavern_054",
+     "label": "Kitchen clatter 6",
+     "file": "sfx/tavern/tavern_054.ogg",
+     "dur": 1.34
+    }
+   ]
+  },
+  {
+   "key": "home",
+   "title": "Home & Workshop",
+   "icon": "🏠",
+   "desc": "Books, parchment, cloth, tools and bells",
+   "sounds": [
+    {
+     "id": "home_001",
+     "label": "Turn a page 1",
+     "file": "sfx/home/home_001.ogg",
+     "dur": 0.75
+    },
+    {
+     "id": "home_002",
+     "label": "Turn a page 2",
+     "file": "sfx/home/home_002.ogg",
+     "dur": 1.11
+    },
+    {
+     "id": "home_003",
+     "label": "Turn a page 3",
+     "file": "sfx/home/home_003.ogg",
+     "dur": 1.09
+    },
+    {
+     "id": "home_004",
+     "label": "Turn a page 4",
+     "file": "sfx/home/home_004.ogg",
+     "dur": 0.65
+    },
+    {
+     "id": "home_005",
+     "label": "Open a book",
+     "file": "sfx/home/home_005.ogg",
+     "dur": 0.15
+    },
+    {
+     "id": "home_006",
+     "label": "Close a book",
+     "file": "sfx/home/home_006.ogg",
+     "dur": 0.23
+    },
+    {
+     "id": "home_007",
+     "label": "Heavy tome 1",
+     "file": "sfx/home/home_007.ogg",
+     "dur": 0.72
+    },
+    {
+     "id": "home_008",
+     "label": "Heavy tome 2",
+     "file": "sfx/home/home_008.ogg",
+     "dur": 0.88
+    },
+    {
+     "id": "home_009",
+     "label": "Heavy tome 3",
+     "file": "sfx/home/home_009.ogg",
+     "dur": 1.22
+    },
+    {
+     "id": "home_010",
+     "label": "Heavy tome 4",
+     "file": "sfx/home/home_010.ogg",
+     "dur": 1.15
+    },
+    {
+     "id": "home_011",
+     "label": "Unroll a scroll 1",
+     "file": "sfx/home/home_011.ogg",
+     "dur": 0.42
+    },
+    {
+     "id": "home_012",
+     "label": "Unroll a scroll 2",
+     "file": "sfx/home/home_012.ogg",
+     "dur": 0.55
+    },
+    {
+     "id": "home_013",
+     "label": "Unroll a scroll 3",
+     "file": "sfx/home/home_013.ogg",
+     "dur": 0.55
+    },
+    {
+     "id": "home_014",
+     "label": "Unroll a scroll 4",
+     "file": "sfx/home/home_014.ogg",
+     "dur": 0.61
+    },
+    {
+     "id": "home_015",
+     "label": "Parchment 1",
+     "file": "sfx/home/home_015.ogg",
+     "dur": 0.82
+    },
+    {
+     "id": "home_016",
+     "label": "Parchment 2",
+     "file": "sfx/home/home_016.ogg",
+     "dur": 1.45
+    },
+    {
+     "id": "home_017",
+     "label": "Parchment 3",
+     "file": "sfx/home/home_017.ogg",
+     "dur": 0.73
+    },
+    {
+     "id": "home_018",
+     "label": "Parchment 4",
+     "file": "sfx/home/home_018.ogg",
+     "dur": 0.77
+    },
+    {
+     "id": "home_019",
+     "label": "Parchment 5",
+     "file": "sfx/home/home_019.ogg",
+     "dur": 0.75
+    },
+    {
+     "id": "home_020",
+     "label": "Tear parchment 1",
+     "file": "sfx/home/home_020.ogg",
+     "dur": 1.26
+    },
+    {
+     "id": "home_021",
+     "label": "Tear parchment 2",
+     "file": "sfx/home/home_021.ogg",
+     "dur": 1.39
+    },
+    {
+     "id": "home_022",
+     "label": "Cloth rustles 1",
+     "file": "sfx/home/home_022.ogg",
+     "dur": 0.66
+    },
+    {
+     "id": "home_023",
+     "label": "Cloth rustles 2",
+     "file": "sfx/home/home_023.ogg",
+     "dur": 0.42
+    },
+    {
+     "id": "home_024",
+     "label": "Cloth rustles 3",
+     "file": "sfx/home/home_024.ogg",
+     "dur": 0.48
+    },
+    {
+     "id": "home_025",
+     "label": "Cloth rustles 4",
+     "file": "sfx/home/home_025.ogg",
+     "dur": 0.38
+    },
+    {
+     "id": "home_026",
+     "label": "Buckle a belt 1",
+     "file": "sfx/home/home_026.ogg",
+     "dur": 0.72
+    },
+    {
+     "id": "home_027",
+     "label": "Buckle a belt 2",
+     "file": "sfx/home/home_027.ogg",
+     "dur": 0.75
+    },
+    {
+     "id": "home_028",
+     "label": "Drop a leather bag",
+     "file": "sfx/home/home_028.ogg",
+     "dur": 0.42
+    },
+    {
+     "id": "home_029",
+     "label": "Cloak swish 1",
+     "file": "sfx/home/home_029.ogg",
+     "dur": 1.73
+    },
+    {
+     "id": "home_030",
+     "label": "Cloak swish 2",
+     "file": "sfx/home/home_030.ogg",
+     "dur": 1.5
+    },
+    {
+     "id": "home_031",
+     "label": "Cloak swish 3",
+     "file": "sfx/home/home_031.ogg",
+     "dur": 1.75
+    },
+    {
+     "id": "home_032",
+     "label": "Cloak swish 4",
+     "file": "sfx/home/home_032.ogg",
+     "dur": 0.57
+    },
+    {
+     "id": "home_033",
+     "label": "Blacksmith at the anvil",
+     "file": "sfx/home/home_033.ogg",
+     "dur": 2.45
+    },
+    {
+     "id": "home_034",
+     "label": "Hammer strike",
+     "file": "sfx/home/home_034.ogg",
+     "dur": 0.5
+    },
+    {
+     "id": "home_035",
+     "label": "Hammer on metal 1",
+     "file": "sfx/home/home_035.ogg",
+     "dur": 2.03
+    },
+    {
+     "id": "home_036",
+     "label": "Hammer on metal 2",
+     "file": "sfx/home/home_036.ogg",
+     "dur": 1.6
+    },
+    {
+     "id": "home_037",
+     "label": "Hammer tap 1",
+     "file": "sfx/home/home_037.ogg",
+     "dur": 0.5
+    },
+    {
+     "id": "home_038",
+     "label": "Hammer tap 2",
+     "file": "sfx/home/home_038.ogg",
+     "dur": 0.24
+    },
+    {
+     "id": "home_039",
+     "label": "Hammer tap 3",
+     "file": "sfx/home/home_039.ogg",
+     "dur": 0.23
+    },
+    {
+     "id": "home_040",
+     "label": "Hammer tap 4",
+     "file": "sfx/home/home_040.ogg",
+     "dur": 0.26
+    },
+    {
+     "id": "home_041",
+     "label": "Saw wood",
+     "file": "sfx/home/home_041.ogg",
+     "dur": 6.44
+    },
+    {
+     "id": "home_042",
+     "label": "Sawing",
+     "file": "sfx/home/home_042.ogg",
+     "dur": 5.61
+    },
+    {
+     "id": "home_043",
+     "label": "Tools clink 1",
+     "file": "sfx/home/home_043.ogg",
+     "dur": 0.59
+    },
+    {
+     "id": "home_044",
+     "label": "Tools clink 2",
+     "file": "sfx/home/home_044.ogg",
+     "dur": 0.45
+    },
+    {
+     "id": "home_045",
+     "label": "Tools clink 3",
+     "file": "sfx/home/home_045.ogg",
+     "dur": 0.47
+    },
+    {
+     "id": "home_046",
+     "label": "Tools clink 4",
+     "file": "sfx/home/home_046.ogg",
+     "dur": 0.81
+    },
+    {
+     "id": "home_047",
+     "label": "Sharpen a blade 1",
+     "file": "sfx/home/home_047.ogg",
+     "dur": 2.28
+    },
+    {
+     "id": "home_048",
+     "label": "Sharpen a blade 2",
+     "file": "sfx/home/home_048.ogg",
+     "dur": 2.52
+    },
+    {
+     "id": "home_049",
+     "label": "Bell 1",
+     "file": "sfx/home/home_049.ogg",
+     "dur": 1.3
+    },
+    {
+     "id": "home_050",
+     "label": "Bell 2",
+     "file": "sfx/home/home_050.ogg",
+     "dur": 0.53
+    },
+    {
+     "id": "home_051",
+     "label": "Bell 3",
+     "file": "sfx/home/home_051.ogg",
+     "dur": 1.78
+    },
+    {
+     "id": "home_052",
+     "label": "Gong 1",
+     "file": "sfx/home/home_052.ogg",
+     "dur": 1.42
+    },
+    {
+     "id": "home_053",
+     "label": "Gong 2",
+     "file": "sfx/home/home_053.ogg",
+     "dur": 1.19
+    },
+    {
+     "id": "home_054",
+     "label": "Deep chime",
+     "file": "sfx/home/home_054.ogg",
+     "dur": 2.11
+    },
+    {
+     "id": "home_055",
+     "label": "Strike a flame",
+     "file": "sfx/home/home_055.ogg",
+     "dur": 0.76
+    }
+   ]
+  },
+  {
+   "key": "weapons",
+   "title": "Weapons & Armor",
+   "icon": "⚔️",
+   "desc": "Swords, arrows, armor, impacts and cannons",
+   "sounds": [
+    {
+     "id": "weapons_001",
+     "label": "Draw a sword 1",
+     "file": "sfx/weapons/weapons_001.ogg",
+     "dur": 0.54
+    },
+    {
+     "id": "weapons_002",
+     "label": "Draw a sword 2",
+     "file": "sfx/weapons/weapons_002.ogg",
+     "dur": 0.37
+    },
+    {
+     "id": "weapons_003",
+     "label": "Draw a sword 3",
+     "file": "sfx/weapons/weapons_003.ogg",
+     "dur": 0.51
+    },
+    {
+     "id": "weapons_004",
+     "label": "Draw a sword 4",
+     "file": "sfx/weapons/weapons_004.ogg",
+     "dur": 0.48
+    },
+    {
+     "id": "weapons_005",
+     "label": "Draw a sword 5",
+     "file": "sfx/weapons/weapons_005.ogg",
+     "dur": 0.42
+    },
+    {
+     "id": "weapons_006",
+     "label": "Swords clash 1",
+     "file": "sfx/weapons/weapons_006.ogg",
+     "dur": 1.34
+    },
+    {
+     "id": "weapons_007",
+     "label": "Swords clash 2",
+     "file": "sfx/weapons/weapons_007.ogg",
+     "dur": 1.29
+    },
+    {
+     "id": "weapons_008",
+     "label": "Swords clash 3",
+     "file": "sfx/weapons/weapons_008.ogg",
+     "dur": 0.8
+    },
+    {
+     "id": "weapons_009",
+     "label": "Swords clash 4",
+     "file": "sfx/weapons/weapons_009.ogg",
+     "dur": 1.32
+    },
+    {
+     "id": "weapons_010",
+     "label": "Swords clash 5",
+     "file": "sfx/weapons/weapons_010.ogg",
+     "dur": 0.76
+    },
+    {
+     "id": "weapons_011",
+     "label": "Swing 1",
+     "file": "sfx/weapons/weapons_011.ogg",
+     "dur": 0.23
+    },
+    {
+     "id": "weapons_012",
+     "label": "Swing 2",
+     "file": "sfx/weapons/weapons_012.ogg",
+     "dur": 0.15
+    },
+    {
+     "id": "weapons_013",
+     "label": "Swing 3",
+     "file": "sfx/weapons/weapons_013.ogg",
+     "dur": 0.14
+    },
+    {
+     "id": "weapons_014",
+     "label": "Whoosh 1",
+     "file": "sfx/weapons/weapons_014.ogg",
+     "dur": 0.13
+    },
+    {
+     "id": "weapons_015",
+     "label": "Whoosh 2",
+     "file": "sfx/weapons/weapons_015.ogg",
+     "dur": 0.1
+    },
+    {
+     "id": "weapons_016",
+     "label": "Whoosh 3",
+     "file": "sfx/weapons/weapons_016.ogg",
+     "dur": 0.15
+    },
+    {
+     "id": "weapons_017",
+     "label": "Whoosh 4",
+     "file": "sfx/weapons/weapons_017.ogg",
+     "dur": 0.19
+    },
+    {
+     "id": "weapons_018",
+     "label": "Whoosh 5",
+     "file": "sfx/weapons/weapons_018.ogg",
+     "dur": 0.2
+    },
+    {
+     "id": "weapons_019",
+     "label": "Sword hit",
+     "file": "sfx/weapons/weapons_019.ogg",
+     "dur": 0.54
+    },
+    {
+     "id": "weapons_020",
+     "label": "Blunt hit",
+     "file": "sfx/weapons/weapons_020.ogg",
+     "dur": 0.61
+    },
+    {
+     "id": "weapons_021",
+     "label": "Blade ring 1",
+     "file": "sfx/weapons/weapons_021.ogg",
+     "dur": 0.29
+    },
+    {
+     "id": "weapons_022",
+     "label": "Blade ring 2",
+     "file": "sfx/weapons/weapons_022.ogg",
+     "dur": 0.31
+    },
+    {
+     "id": "weapons_023",
+     "label": "Blade ring 3",
+     "file": "sfx/weapons/weapons_023.ogg",
+     "dur": 0.4
+    },
+    {
+     "id": "weapons_024",
+     "label": "Draw a dagger 1",
+     "file": "sfx/weapons/weapons_024.ogg",
+     "dur": 0.4
+    },
+    {
+     "id": "weapons_025",
+     "label": "Draw a dagger 2",
+     "file": "sfx/weapons/weapons_025.ogg",
+     "dur": 0.45
+    },
+    {
+     "id": "weapons_026",
+     "label": "Draw a dagger 3",
+     "file": "sfx/weapons/weapons_026.ogg",
+     "dur": 0.48
+    },
+    {
+     "id": "weapons_027",
+     "label": "Sheathe a dagger 1",
+     "file": "sfx/weapons/weapons_027.ogg",
+     "dur": 0.41
+    },
+    {
+     "id": "weapons_028",
+     "label": "Sheathe a dagger 2",
+     "file": "sfx/weapons/weapons_028.ogg",
+     "dur": 0.99
+    },
+    {
+     "id": "weapons_029",
+     "label": "Slash 1",
+     "file": "sfx/weapons/weapons_029.ogg",
+     "dur": 0.6
+    },
+    {
+     "id": "weapons_030",
+     "label": "Slash 2",
+     "file": "sfx/weapons/weapons_030.ogg",
+     "dur": 0.57
+    },
+    {
+     "id": "weapons_031",
+     "label": "Chop",
+     "file": "sfx/weapons/weapons_031.ogg",
+     "dur": 0.24
+    },
+    {
+     "id": "weapons_032",
+     "label": "Draw an arrow 1",
+     "file": "sfx/weapons/weapons_032.ogg",
+     "dur": 0.62
+    },
+    {
+     "id": "weapons_033",
+     "label": "Draw an arrow 2",
+     "file": "sfx/weapons/weapons_033.ogg",
+     "dur": 1.23
+    },
+    {
+     "id": "weapons_034",
+     "label": "Arrow back in quiver 1",
+     "file": "sfx/weapons/weapons_034.ogg",
+     "dur": 0.73
+    },
+    {
+     "id": "weapons_035",
+     "label": "Arrow back in quiver 2",
+     "file": "sfx/weapons/weapons_035.ogg",
+     "dur": 0.52
+    },
+    {
+     "id": "weapons_036",
+     "label": "Arrow fletching",
+     "file": "sfx/weapons/weapons_036.ogg",
+     "dur": 0.54
+    },
+    {
+     "id": "weapons_037",
+     "label": "Chainmail 1",
+     "file": "sfx/weapons/weapons_037.ogg",
+     "dur": 0.58
+    },
+    {
+     "id": "weapons_038",
+     "label": "Chainmail 2",
+     "file": "sfx/weapons/weapons_038.ogg",
+     "dur": 0.75
+    },
+    {
+     "id": "weapons_039",
+     "label": "Leather armor",
+     "file": "sfx/weapons/weapons_039.ogg",
+     "dur": 0.5
+    },
+    {
+     "id": "weapons_040",
+     "label": "Chains rattle 1",
+     "file": "sfx/weapons/weapons_040.ogg",
+     "dur": 0.51
+    },
+    {
+     "id": "weapons_041",
+     "label": "Chains rattle 2",
+     "file": "sfx/weapons/weapons_041.ogg",
+     "dur": 0.49
+    },
+    {
+     "id": "weapons_042",
+     "label": "Chains rattle 3",
+     "file": "sfx/weapons/weapons_042.ogg",
+     "dur": 0.93
+    },
+    {
+     "id": "weapons_043",
+     "label": "Shield rings",
+     "file": "sfx/weapons/weapons_043.ogg",
+     "dur": 0.52
+    },
+    {
+     "id": "weapons_044",
+     "label": "Metal impact 1",
+     "file": "sfx/weapons/weapons_044.ogg",
+     "dur": 0.24
+    },
+    {
+     "id": "weapons_045",
+     "label": "Metal impact 2",
+     "file": "sfx/weapons/weapons_045.ogg",
+     "dur": 0.55
+    },
+    {
+     "id": "weapons_046",
+     "label": "Metal impact 3",
+     "file": "sfx/weapons/weapons_046.ogg",
+     "dur": 0.46
+    },
+    {
+     "id": "weapons_047",
+     "label": "Heavy impact 1",
+     "file": "sfx/weapons/weapons_047.ogg",
+     "dur": 0.73
+    },
+    {
+     "id": "weapons_048",
+     "label": "Heavy impact 2",
+     "file": "sfx/weapons/weapons_048.ogg",
+     "dur": 0.8
+    },
+    {
+     "id": "weapons_049",
+     "label": "Heavy impact 3",
+     "file": "sfx/weapons/weapons_049.ogg",
+     "dur": 0.49
+    },
+    {
+     "id": "weapons_050",
+     "label": "Heavy impact 4",
+     "file": "sfx/weapons/weapons_050.ogg",
+     "dur": 0.5
+    },
+    {
+     "id": "weapons_051",
+     "label": "Great clang 1",
+     "file": "sfx/weapons/weapons_051.ogg",
+     "dur": 5.39
+    },
+    {
+     "id": "weapons_052",
+     "label": "Great clang 2",
+     "file": "sfx/weapons/weapons_052.ogg",
+     "dur": 5.39
+    },
+    {
+     "id": "weapons_053",
+     "label": "Cannon fires",
+     "file": "sfx/weapons/weapons_053.ogg",
+     "dur": 3.58
+    },
+    {
+     "id": "weapons_054",
+     "label": "Cannonball hits a wall",
+     "file": "sfx/weapons/weapons_054.ogg",
+     "dur": 3.01
+    },
+    {
+     "id": "weapons_055",
+     "label": "Cannonball splashes",
+     "file": "sfx/weapons/weapons_055.ogg",
+     "dur": 1.65
+    }
+   ]
+  },
+  {
+   "key": "people",
+   "title": "People",
+   "icon": "🧑",
+   "desc": "Footsteps, coughs, laughs and crowds",
+   "sounds": [
+    {
+     "id": "people_001",
+     "label": "Footstep 1",
+     "file": "sfx/people/people_001.ogg",
+     "dur": 0.25
+    },
+    {
+     "id": "people_002",
+     "label": "Footstep 2",
+     "file": "sfx/people/people_002.ogg",
+     "dur": 0.28
+    },
+    {
+     "id": "people_003",
+     "label": "Footstep 3",
+     "file": "sfx/people/people_003.ogg",
+     "dur": 0.24
+    },
+    {
+     "id": "people_004",
+     "label": "Footstep 4",
+     "file": "sfx/people/people_004.ogg",
+     "dur": 0.27
+    },
+    {
+     "id": "people_005",
+     "label": "Footstep 5",
+     "file": "sfx/people/people_005.ogg",
+     "dur": 0.32
+    },
+    {
+     "id": "people_006",
+     "label": "Steps on wood 1",
+     "file": "sfx/people/people_006.ogg",
+     "dur": 0.26
+    },
+    {
+     "id": "people_007",
+     "label": "Steps on wood 2",
+     "file": "sfx/people/people_007.ogg",
+     "dur": 0.25
+    },
+    {
+     "id": "people_008",
+     "label": "Steps on wood 3",
+     "file": "sfx/people/people_008.ogg",
+     "dur": 0.26
+    },
+    {
+     "id": "people_009",
+     "label": "Wet steps 1",
+     "file": "sfx/people/people_009.ogg",
+     "dur": 0.28
+    },
+    {
+     "id": "people_010",
+     "label": "Wet steps 2",
+     "file": "sfx/people/people_010.ogg",
+     "dur": 0.4
+    },
+    {
+     "id": "people_011",
+     "label": "Leather boot step",
+     "file": "sfx/people/people_011.ogg",
+     "dur": 0.68
+    },
+    {
+     "id": "people_012",
+     "label": "Jump and land",
+     "file": "sfx/people/people_012.ogg",
+     "dur": 0.5
+    },
+    {
+     "id": "people_013",
+     "label": "Steps in mud 1",
+     "file": "sfx/people/people_013.ogg",
+     "dur": 4.23
+    },
+    {
+     "id": "people_014",
+     "label": "Steps in mud 2",
+     "file": "sfx/people/people_014.ogg",
+     "dur": 2.41
+    },
+    {
+     "id": "people_015",
+     "label": "Steps on dirt",
+     "file": "sfx/people/people_015.ogg",
+     "dur": 1.26
+    },
+    {
+     "id": "people_016",
+     "label": "Cough 1",
+     "file": "sfx/people/people_016.ogg",
+     "dur": 0.43
+    },
+    {
+     "id": "people_017",
+     "label": "Cough 2",
+     "file": "sfx/people/people_017.ogg",
+     "dur": 0.35
+    },
+    {
+     "id": "people_018",
+     "label": "Cough 3",
+     "file": "sfx/people/people_018.ogg",
+     "dur": 0.84
+    },
+    {
+     "id": "people_019",
+     "label": "Old man coughs",
+     "file": "sfx/people/people_019.ogg",
+     "dur": 5.45
+    },
+    {
+     "id": "people_020",
+     "label": "Snore",
+     "file": "sfx/people/people_020.ogg",
+     "dur": 0.44
+    },
+    {
+     "id": "people_021",
+     "label": "Loud snore",
+     "file": "sfx/people/people_021.ogg",
+     "dur": 0.93
+    },
+    {
+     "id": "people_022",
+     "label": "Heavy breath",
+     "file": "sfx/people/people_022.ogg",
+     "dur": 0.67
+    },
+    {
+     "id": "people_023",
+     "label": "Ooh!",
+     "file": "sfx/people/people_023.ogg",
+     "dur": 0.74
+    },
+    {
+     "id": "people_024",
+     "label": "Spit 1",
+     "file": "sfx/people/people_024.ogg",
+     "dur": 0.49
+    },
+    {
+     "id": "people_025",
+     "label": "Spit 2",
+     "file": "sfx/people/people_025.ogg",
+     "dur": 0.69
+    },
+    {
+     "id": "people_026",
+     "label": "Feeling sick",
+     "file": "sfx/people/people_026.ogg",
+     "dur": 7.55
+    },
+    {
+     "id": "people_027",
+     "label": "Crowd laughs",
+     "file": "sfx/people/people_027.ogg",
+     "dur": 25.94
+    },
+    {
+     "id": "people_028",
+     "label": "Applause in a great hall",
+     "file": "sfx/people/people_028.ogg",
+     "dur": 30.0
+    },
+    {
+     "id": "people_029",
+     "label": "Pained grunt 1",
+     "file": "sfx/people/people_029.ogg",
+     "dur": 0.62
+    },
+    {
+     "id": "people_030",
+     "label": "Pained grunt 2",
+     "file": "sfx/people/people_030.ogg",
+     "dur": 0.75
+    },
+    {
+     "id": "people_031",
+     "label": "Pained grunt 3",
+     "file": "sfx/people/people_031.ogg",
+     "dur": 0.77
+    },
+    {
+     "id": "people_032",
+     "label": "Pained grunt 4",
+     "file": "sfx/people/people_032.ogg",
+     "dur": 0.66
+    }
+   ]
+  },
+  {
+   "key": "animals",
+   "title": "Animals",
+   "icon": "🐾",
+   "desc": "Birds, cats, dogs, farm animals and horses",
+   "sounds": [
+    {
+     "id": "animals_001",
+     "label": "Crow caws",
+     "file": "sfx/animals/animals_001.ogg",
+     "dur": 0.55
+    },
+    {
+     "id": "animals_002",
+     "label": "Raven croaks",
+     "file": "sfx/animals/animals_002.ogg",
+     "dur": 0.6
+    },
+    {
+     "id": "animals_003",
+     "label": "Flock of crows",
+     "file": "sfx/animals/animals_003.ogg",
+     "dur": 9.34
+    },
+    {
+     "id": "animals_004",
+     "label": "Vulture",
+     "file": "sfx/animals/animals_004.ogg",
+     "dur": 1.19
+    },
+    {
+     "id": "animals_005",
+     "label": "Songbird",
+     "file": "sfx/animals/animals_005.ogg",
+     "dur": 0.73
+    },
+    {
+     "id": "animals_006",
+     "label": "Songbird trills",
+     "file": "sfx/animals/animals_006.ogg",
+     "dur": 1.18
+    },
+    {
+     "id": "animals_007",
+     "label": "Night bird",
+     "file": "sfx/animals/animals_007.ogg",
+     "dur": 0.84
+    },
+    {
+     "id": "animals_008",
+     "label": "Birds chirp",
+     "file": "sfx/animals/animals_008.ogg",
+     "dur": 3.0
+    },
+    {
+     "id": "animals_009",
+     "label": "Wings flap",
+     "file": "sfx/animals/animals_009.ogg",
+     "dur": 0.26
+    },
+    {
+     "id": "animals_010",
+     "label": "Bat flutters",
+     "file": "sfx/animals/animals_010.ogg",
+     "dur": 1.07
+    },
+    {
+     "id": "animals_011",
+     "label": "Crickets",
+     "file": "sfx/animals/animals_011.ogg",
+     "dur": 3.32
+    },
+    {
+     "id": "animals_012",
+     "label": "Frog croaks",
+     "file": "sfx/animals/animals_012.ogg",
+     "dur": 0.29
+    },
+    {
+     "id": "animals_013",
+     "label": "Mosquito",
+     "file": "sfx/animals/animals_013.ogg",
+     "dur": 0.35
+    },
+    {
+     "id": "animals_014",
+     "label": "Cat meows 1",
+     "file": "sfx/animals/animals_014.ogg",
+     "dur": 1.13
+    },
+    {
+     "id": "animals_015",
+     "label": "Cat meows 2",
+     "file": "sfx/animals/animals_015.ogg",
+     "dur": 1.41
+    },
+    {
+     "id": "animals_016",
+     "label": "Cat meows 3",
+     "file": "sfx/animals/animals_016.ogg",
+     "dur": 2.48
+    },
+    {
+     "id": "animals_017",
+     "label": "Cat purrs",
+     "file": "sfx/animals/animals_017.ogg",
+     "dur": 5.65
+    },
+    {
+     "id": "animals_018",
+     "label": "Meow",
+     "file": "sfx/animals/animals_018.ogg",
+     "dur": 0.51
+    },
+    {
+     "id": "animals_019",
+     "label": "Dog barks 1",
+     "file": "sfx/animals/animals_019.ogg",
+     "dur": 0.4
+    },
+    {
+     "id": "animals_020",
+     "label": "Dog barks 2",
+     "file": "sfx/animals/animals_020.ogg",
+     "dur": 0.46
+    },
+    {
+     "id": "animals_021",
+     "label": "Dog grumbles",
+     "file": "sfx/animals/animals_021.ogg",
+     "dur": 0.58
+    },
+    {
+     "id": "animals_022",
+     "label": "Wolf howls",
+     "file": "sfx/animals/animals_022.ogg",
+     "dur": 0.72
+    },
+    {
+     "id": "animals_023",
+     "label": "Sheep bleats",
+     "file": "sfx/animals/animals_023.ogg",
+     "dur": 0.87
+    },
+    {
+     "id": "animals_024",
+     "label": "Yak grunts",
+     "file": "sfx/animals/animals_024.ogg",
+     "dur": 0.55
+    },
+    {
+     "id": "animals_025",
+     "label": "Cow moos 1",
+     "file": "sfx/animals/animals_025.ogg",
+     "dur": 1.48
+    },
+    {
+     "id": "animals_026",
+     "label": "Cow moos 2",
+     "file": "sfx/animals/animals_026.ogg",
+     "dur": 0.95
+    },
+    {
+     "id": "animals_027",
+     "label": "Horse trots",
+     "file": "sfx/animals/animals_027.ogg",
+     "dur": 12.45
+    },
+    {
+     "id": "animals_028",
+     "label": "Rabbit nibbles",
+     "file": "sfx/animals/animals_028.ogg",
+     "dur": 13.33
+    },
+    {
+     "id": "animals_029",
+     "label": "Insect buzz 1",
+     "file": "sfx/animals/animals_029.ogg",
+     "dur": 0.58
+    },
+    {
+     "id": "animals_030",
+     "label": "Insect buzz 2",
+     "file": "sfx/animals/animals_030.ogg",
+     "dur": 0.57
+    }
+   ]
+  },
+  {
+   "key": "monsters",
+   "title": "Monsters",
+   "icon": "👹",
+   "desc": "Goblins, ogres, trolls, ghosts and beasts",
+   "sounds": [
+    {
+     "id": "monsters_001",
+     "label": "Goblin 1",
+     "file": "sfx/monsters/monsters_001.ogg",
+     "dur": 0.2
+    },
+    {
+     "id": "monsters_002",
+     "label": "Goblin 2",
+     "file": "sfx/monsters/monsters_002.ogg",
+     "dur": 0.25
+    },
+    {
+     "id": "monsters_003",
+     "label": "Goblin 3",
+     "file": "sfx/monsters/monsters_003.ogg",
+     "dur": 0.95
+    },
+    {
+     "id": "monsters_004",
+     "label": "Goblin 4",
+     "file": "sfx/monsters/monsters_004.ogg",
+     "dur": 0.52
+    },
+    {
+     "id": "monsters_005",
+     "label": "Goblin 5",
+     "file": "sfx/monsters/monsters_005.ogg",
+     "dur": 0.28
+    },
+    {
+     "id": "monsters_006",
+     "label": "Goblin 6",
+     "file": "sfx/monsters/monsters_006.ogg",
+     "dur": 0.24
+    },
+    {
+     "id": "monsters_007",
+     "label": "Goblin 7",
+     "file": "sfx/monsters/monsters_007.ogg",
+     "dur": 0.25
+    },
+    {
+     "id": "monsters_008",
+     "label": "Goblin 8",
+     "file": "sfx/monsters/monsters_008.ogg",
+     "dur": 0.18
+    },
+    {
+     "id": "monsters_009",
+     "label": "Ogre 1",
+     "file": "sfx/monsters/monsters_009.ogg",
+     "dur": 0.4
+    },
+    {
+     "id": "monsters_010",
+     "label": "Ogre 2",
+     "file": "sfx/monsters/monsters_010.ogg",
+     "dur": 0.59
+    },
+    {
+     "id": "monsters_011",
+     "label": "Ogre 3",
+     "file": "sfx/monsters/monsters_011.ogg",
+     "dur": 0.58
+    },
+    {
+     "id": "monsters_012",
+     "label": "Ogre 4",
+     "file": "sfx/monsters/monsters_012.ogg",
+     "dur": 0.58
+    },
+    {
+     "id": "monsters_013",
+     "label": "Ogre 5",
+     "file": "sfx/monsters/monsters_013.ogg",
+     "dur": 0.34
+    },
+    {
+     "id": "monsters_014",
+     "label": "Giant 1",
+     "file": "sfx/monsters/monsters_014.ogg",
+     "dur": 0.65
+    },
+    {
+     "id": "monsters_015",
+     "label": "Giant 2",
+     "file": "sfx/monsters/monsters_015.ogg",
+     "dur": 0.93
+    },
+    {
+     "id": "monsters_016",
+     "label": "Giant 3",
+     "file": "sfx/monsters/monsters_016.ogg",
+     "dur": 0.62
+    },
+    {
+     "id": "monsters_017",
+     "label": "Giant 4",
+     "file": "sfx/monsters/monsters_017.ogg",
+     "dur": 0.54
+    },
+    {
+     "id": "monsters_018",
+     "label": "Giant 5",
+     "file": "sfx/monsters/monsters_018.ogg",
+     "dur": 0.71
+    },
+    {
+     "id": "monsters_019",
+     "label": "Troll 1",
+     "file": "sfx/monsters/monsters_019.ogg",
+     "dur": 0.57
+    },
+    {
+     "id": "monsters_020",
+     "label": "Troll 2",
+     "file": "sfx/monsters/monsters_020.ogg",
+     "dur": 0.79
+    },
+    {
+     "id": "monsters_021",
+     "label": "Troll 3",
+     "file": "sfx/monsters/monsters_021.ogg",
+     "dur": 0.42
+    },
+    {
+     "id": "monsters_022",
+     "label": "Troll roars",
+     "file": "sfx/monsters/monsters_022.ogg",
+     "dur": 10.93
+    },
+    {
+     "id": "monsters_023",
+     "label": "Troll grumbles",
+     "file": "sfx/monsters/monsters_023.ogg",
+     "dur": 25.7
+    },
+    {
+     "id": "monsters_024",
+     "label": "Wraith 1",
+     "file": "sfx/monsters/monsters_024.ogg",
+     "dur": 0.53
+    },
+    {
+     "id": "monsters_025",
+     "label": "Wraith 2",
+     "file": "sfx/monsters/monsters_025.ogg",
+     "dur": 1.01
+    },
+    {
+     "id": "monsters_026",
+     "label": "Wraith 3",
+     "file": "sfx/monsters/monsters_026.ogg",
+     "dur": 1.12
+    },
+    {
+     "id": "monsters_027",
+     "label": "Wraith 4",
+     "file": "sfx/monsters/monsters_027.ogg",
+     "dur": 1.31
+    },
+    {
+     "id": "monsters_028",
+     "label": "Wraith 5",
+     "file": "sfx/monsters/monsters_028.ogg",
+     "dur": 1.15
+    },
+    {
+     "id": "monsters_029",
+     "label": "Wraith 6",
+     "file": "sfx/monsters/monsters_029.ogg",
+     "dur": 0.56
+    },
+    {
+     "id": "monsters_030",
+     "label": "Ghost moans 1",
+     "file": "sfx/monsters/monsters_030.ogg",
+     "dur": 3.06
+    },
+    {
+     "id": "monsters_031",
+     "label": "Ghost moans 2",
+     "file": "sfx/monsters/monsters_031.ogg",
+     "dur": 5.2
+    },
+    {
+     "id": "monsters_032",
+     "label": "Ghost moans 3",
+     "file": "sfx/monsters/monsters_032.ogg",
+     "dur": 5.77
+    },
+    {
+     "id": "monsters_033",
+     "label": "Ghost moans 4",
+     "file": "sfx/monsters/monsters_033.ogg",
+     "dur": 4.99
+    },
+    {
+     "id": "monsters_034",
+     "label": "Beast growls 1",
+     "file": "sfx/monsters/monsters_034.ogg",
+     "dur": 0.44
+    },
+    {
+     "id": "monsters_035",
+     "label": "Beast growls 2",
+     "file": "sfx/monsters/monsters_035.ogg",
+     "dur": 0.54
+    },
+    {
+     "id": "monsters_036",
+     "label": "Beast growls 3",
+     "file": "sfx/monsters/monsters_036.ogg",
+     "dur": 0.75
+    },
+    {
+     "id": "monsters_037",
+     "label": "Beast growls 4",
+     "file": "sfx/monsters/monsters_037.ogg",
+     "dur": 0.44
+    },
+    {
+     "id": "monsters_038",
+     "label": "Beast growls 5",
+     "file": "sfx/monsters/monsters_038.ogg",
+     "dur": 0.54
+    },
+    {
+     "id": "monsters_039",
+     "label": "Werewolf",
+     "file": "sfx/monsters/monsters_039.ogg",
+     "dur": 0.41
+    },
+    {
+     "id": "monsters_040",
+     "label": "Dire wolf",
+     "file": "sfx/monsters/monsters_040.ogg",
+     "dur": 1.59
+    },
+    {
+     "id": "monsters_041",
+     "label": "Monster roars 1",
+     "file": "sfx/monsters/monsters_041.ogg",
+     "dur": 0.64
+    },
+    {
+     "id": "monsters_042",
+     "label": "Monster roars 2",
+     "file": "sfx/monsters/monsters_042.ogg",
+     "dur": 1.04
+    },
+    {
+     "id": "monsters_043",
+     "label": "Monster roars 3",
+     "file": "sfx/monsters/monsters_043.ogg",
+     "dur": 1.16
+    },
+    {
+     "id": "monsters_044",
+     "label": "Great roar 1",
+     "file": "sfx/monsters/monsters_044.ogg",
+     "dur": 0.91
+    },
+    {
+     "id": "monsters_045",
+     "label": "Great roar 2",
+     "file": "sfx/monsters/monsters_045.ogg",
+     "dur": 1.13
+    },
+    {
+     "id": "monsters_046",
+     "label": "Great roar 3",
+     "file": "sfx/monsters/monsters_046.ogg",
+     "dur": 0.95
+    },
+    {
+     "id": "monsters_047",
+     "label": "Creature 1",
+     "file": "sfx/monsters/monsters_047.ogg",
+     "dur": 1.0
+    },
+    {
+     "id": "monsters_048",
+     "label": "Creature 2",
+     "file": "sfx/monsters/monsters_048.ogg",
+     "dur": 0.58
+    },
+    {
+     "id": "monsters_049",
+     "label": "Creature 3",
+     "file": "sfx/monsters/monsters_049.ogg",
+     "dur": 0.78
+    },
+    {
+     "id": "monsters_050",
+     "label": "Creature 4",
+     "file": "sfx/monsters/monsters_050.ogg",
+     "dur": 1.28
+    },
+    {
+     "id": "monsters_051",
+     "label": "Monster 1",
+     "file": "sfx/monsters/monsters_051.ogg",
+     "dur": 0.75
+    },
+    {
+     "id": "monsters_052",
+     "label": "Monster 2",
+     "file": "sfx/monsters/monsters_052.ogg",
+     "dur": 0.87
+    },
+    {
+     "id": "monsters_053",
+     "label": "Monster 3",
+     "file": "sfx/monsters/monsters_053.ogg",
+     "dur": 0.69
+    },
+    {
+     "id": "monsters_054",
+     "label": "Monster 4",
+     "file": "sfx/monsters/monsters_054.ogg",
+     "dur": 0.37
+    },
+    {
+     "id": "monsters_055",
+     "label": "Monster 5",
+     "file": "sfx/monsters/monsters_055.ogg",
+     "dur": 0.45
+    },
+    {
+     "id": "monsters_056",
+     "label": "Monster 6",
+     "file": "sfx/monsters/monsters_056.ogg",
+     "dur": 0.48
+    },
+    {
+     "id": "monsters_057",
+     "label": "Creature shrieks 1",
+     "file": "sfx/monsters/monsters_057.ogg",
+     "dur": 0.96
+    },
+    {
+     "id": "monsters_058",
+     "label": "Creature shrieks 2",
+     "file": "sfx/monsters/monsters_058.ogg",
+     "dur": 0.96
+    },
+    {
+     "id": "monsters_059",
+     "label": "Creature dies 1",
+     "file": "sfx/monsters/monsters_059.ogg",
+     "dur": 0.47
+    },
+    {
+     "id": "monsters_060",
+     "label": "Creature dies 2",
+     "file": "sfx/monsters/monsters_060.ogg",
+     "dur": 0.66
+    },
+    {
+     "id": "monsters_061",
+     "label": "Creature dies 3",
+     "file": "sfx/monsters/monsters_061.ogg",
+     "dur": 0.66
+    },
+    {
+     "id": "monsters_062",
+     "label": "Heavy stomp",
+     "file": "sfx/monsters/monsters_062.ogg",
+     "dur": 0.44
+    },
+    {
+     "id": "monsters_063",
+     "label": "Giant beetle 1",
+     "file": "sfx/monsters/monsters_063.ogg",
+     "dur": 0.38
+    },
+    {
+     "id": "monsters_064",
+     "label": "Giant beetle 2",
+     "file": "sfx/monsters/monsters_064.ogg",
+     "dur": 0.35
+    },
+    {
+     "id": "monsters_065",
+     "label": "Ooze 1",
+     "file": "sfx/monsters/monsters_065.ogg",
+     "dur": 0.28
+    },
+    {
+     "id": "monsters_066",
+     "label": "Ooze 2",
+     "file": "sfx/monsters/monsters_066.ogg",
+     "dur": 0.32
+    },
+    {
+     "id": "monsters_067",
+     "label": "Ooze 3",
+     "file": "sfx/monsters/monsters_067.ogg",
+     "dur": 0.25
+    },
+    {
+     "id": "monsters_068",
+     "label": "Evil laugh",
+     "file": "sfx/monsters/monsters_068.ogg",
+     "dur": 2.54
+    }
+   ]
+  },
+  {
+   "key": "magic",
+   "title": "Magic",
+   "icon": "✨",
+   "desc": "Spells, fire magic, potions and bubbles",
+   "sounds": [
+    {
+     "id": "magic_001",
+     "label": "Magic flare",
+     "file": "sfx/magic/magic_001.ogg",
+     "dur": 0.88
+    },
+    {
+     "id": "magic_002",
+     "label": "Spell cast",
+     "file": "sfx/magic/magic_002.ogg",
+     "dur": 3.25
+    },
+    {
+     "id": "magic_003",
+     "label": "Spell 1",
+     "file": "sfx/magic/magic_003.ogg",
+     "dur": 0.63
+    },
+    {
+     "id": "magic_004",
+     "label": "Spell 2",
+     "file": "sfx/magic/magic_004.ogg",
+     "dur": 0.55
+    },
+    {
+     "id": "magic_005",
+     "label": "Fireball 1",
+     "file": "sfx/magic/magic_005.ogg",
+     "dur": 1.06
+    },
+    {
+     "id": "magic_006",
+     "label": "Fireball 2",
+     "file": "sfx/magic/magic_006.ogg",
+     "dur": 1.07
+    },
+    {
+     "id": "magic_007",
+     "label": "Fireball 3",
+     "file": "sfx/magic/magic_007.ogg",
+     "dur": 1.93
+    },
+    {
+     "id": "magic_008",
+     "label": "Fireball 4",
+     "file": "sfx/magic/magic_008.ogg",
+     "dur": 1.59
+    },
+    {
+     "id": "magic_009",
+     "label": "Fireball 5",
+     "file": "sfx/magic/magic_009.ogg",
+     "dur": 1.24
+    },
+    {
+     "id": "magic_010",
+     "label": "Fire staff 1",
+     "file": "sfx/magic/magic_010.ogg",
+     "dur": 8.54
+    },
+    {
+     "id": "magic_011",
+     "label": "Fire staff 2",
+     "file": "sfx/magic/magic_011.ogg",
+     "dur": 8.5
+    },
+    {
+     "id": "magic_012",
+     "label": "Arcane blast",
+     "file": "sfx/magic/magic_012.ogg",
+     "dur": 0.56
+    },
+    {
+     "id": "magic_013",
+     "label": "Ice burst",
+     "file": "sfx/magic/magic_013.ogg",
+     "dur": 0.87
+    },
+    {
+     "id": "magic_014",
+     "label": "Vanish",
+     "file": "sfx/magic/magic_014.ogg",
+     "dur": 1.5
+    },
+    {
+     "id": "magic_015",
+     "label": "Magic chime",
+     "file": "sfx/magic/magic_015.ogg",
+     "dur": 0.72
+    },
+    {
+     "id": "magic_016",
+     "label": "Potion bubbles 1",
+     "file": "sfx/magic/magic_016.ogg",
+     "dur": 0.46
+    },
+    {
+     "id": "magic_017",
+     "label": "Potion bubbles 2",
+     "file": "sfx/magic/magic_017.ogg",
+     "dur": 0.44
+    },
+    {
+     "id": "magic_018",
+     "label": "Potion bubbles 3",
+     "file": "sfx/magic/magic_018.ogg",
+     "dur": 0.73
+    },
+    {
+     "id": "magic_019",
+     "label": "Cauldron bubbles 1",
+     "file": "sfx/magic/magic_019.ogg",
+     "dur": 0.7
+    },
+    {
+     "id": "magic_020",
+     "label": "Cauldron bubbles 2",
+     "file": "sfx/magic/magic_020.ogg",
+     "dur": 0.36
+    },
+    {
+     "id": "magic_021",
+     "label": "Cauldron bubbles 3",
+     "file": "sfx/magic/magic_021.ogg",
+     "dur": 0.55
+    },
+    {
+     "id": "magic_022",
+     "label": "Open a potion 1",
+     "file": "sfx/magic/magic_022.ogg",
+     "dur": 0.5
+    },
+    {
+     "id": "magic_023",
+     "label": "Open a potion 2",
+     "file": "sfx/magic/magic_023.ogg",
+     "dur": 0.4
+    },
+    {
+     "id": "magic_024",
+     "label": "Potions rattle 1",
+     "file": "sfx/magic/magic_024.ogg",
+     "dur": 1.19
+    },
+    {
+     "id": "magic_025",
+     "label": "Potions rattle 2",
+     "file": "sfx/magic/magic_025.ogg",
+     "dur": 0.7
+    },
+    {
+     "id": "magic_026",
+     "label": "Slimy spell 1",
+     "file": "sfx/magic/magic_026.ogg",
+     "dur": 0.47
+    },
+    {
+     "id": "magic_027",
+     "label": "Slimy spell 2",
+     "file": "sfx/magic/magic_027.ogg",
+     "dur": 0.45
+    },
+    {
+     "id": "magic_028",
+     "label": "Slimy spell 3",
+     "file": "sfx/magic/magic_028.ogg",
+     "dur": 0.57
+    }
+   ]
+  },
+  {
+   "key": "nature",
+   "title": "Nature & Weather",
+   "icon": "🌲",
+   "desc": "Rain, thunder, wind, fire, water and stone",
+   "sounds": [
+    {
+     "id": "nature_001",
+     "label": "Rain",
+     "file": "sfx/nature/nature_001.ogg",
+     "dur": 3.99
+    },
+    {
+     "id": "nature_002",
+     "label": "Steady rain",
+     "file": "sfx/nature/nature_002.ogg",
+     "dur": 6.83
+    },
+    {
+     "id": "nature_003",
+     "label": "Thunder",
+     "file": "sfx/nature/nature_003.ogg",
+     "dur": 5.26
+    },
+    {
+     "id": "nature_004",
+     "label": "Wind 1",
+     "file": "sfx/nature/nature_004.ogg",
+     "dur": 30.0
+    },
+    {
+     "id": "nature_005",
+     "label": "Wind 2",
+     "file": "sfx/nature/nature_005.ogg",
+     "dur": 30.0
+    },
+    {
+     "id": "nature_006",
+     "label": "Hollow wind",
+     "file": "sfx/nature/nature_006.ogg",
+     "dur": 10.12
+    },
+    {
+     "id": "nature_007",
+     "label": "Campfire crackles",
+     "file": "sfx/nature/nature_007.ogg",
+     "dur": 2.87
+    },
+    {
+     "id": "nature_008",
+     "label": "Fireplace",
+     "file": "sfx/nature/nature_008.ogg",
+     "dur": 29.26
+    },
+    {
+     "id": "nature_009",
+     "label": "Stream",
+     "file": "sfx/nature/nature_009.ogg",
+     "dur": 1.88
+    },
+    {
+     "id": "nature_010",
+     "label": "Running water 1",
+     "file": "sfx/nature/nature_010.ogg",
+     "dur": 3.38
+    },
+    {
+     "id": "nature_011",
+     "label": "Running water 2",
+     "file": "sfx/nature/nature_011.ogg",
+     "dur": 7.01
+    },
+    {
+     "id": "nature_012",
+     "label": "Waterfall",
+     "file": "sfx/nature/nature_012.ogg",
+     "dur": 9.53
+    },
+    {
+     "id": "nature_013",
+     "label": "Waves 1",
+     "file": "sfx/nature/nature_013.ogg",
+     "dur": 1.75
+    },
+    {
+     "id": "nature_014",
+     "label": "Waves 2",
+     "file": "sfx/nature/nature_014.ogg",
+     "dur": 3.25
+    },
+    {
+     "id": "nature_015",
+     "label": "Dripping cave",
+     "file": "sfx/nature/nature_015.ogg",
+     "dur": 20.06
+    },
+    {
+     "id": "nature_016",
+     "label": "Water drop 1",
+     "file": "sfx/nature/nature_016.ogg",
+     "dur": 0.35
+    },
+    {
+     "id": "nature_017",
+     "label": "Water drop 2",
+     "file": "sfx/nature/nature_017.ogg",
+     "dur": 0.4
+    },
+    {
+     "id": "nature_018",
+     "label": "Splash 1",
+     "file": "sfx/nature/nature_018.ogg",
+     "dur": 1.38
+    },
+    {
+     "id": "nature_019",
+     "label": "Splash 2",
+     "file": "sfx/nature/nature_019.ogg",
+     "dur": 0.72
+    },
+    {
+     "id": "nature_020",
+     "label": "Splash 3",
+     "file": "sfx/nature/nature_020.ogg",
+     "dur": 0.77
+    },
+    {
+     "id": "nature_021",
+     "label": "Splash 4",
+     "file": "sfx/nature/nature_021.ogg",
+     "dur": 1.01
+    },
+    {
+     "id": "nature_022",
+     "label": "Forest birdsong",
+     "file": "sfx/nature/nature_022.ogg",
+     "dur": 30.0
+    },
+    {
+     "id": "nature_023",
+     "label": "Stones shift 1",
+     "file": "sfx/nature/nature_023.ogg",
+     "dur": 0.49
+    },
+    {
+     "id": "nature_024",
+     "label": "Stones shift 2",
+     "file": "sfx/nature/nature_024.ogg",
+     "dur": 0.56
+    },
+    {
+     "id": "nature_025",
+     "label": "Stones shift 3",
+     "file": "sfx/nature/nature_025.ogg",
+     "dur": 0.53
+    },
+    {
+     "id": "nature_026",
+     "label": "Rock breaks 1",
+     "file": "sfx/nature/nature_026.ogg",
+     "dur": 1.15
+    },
+    {
+     "id": "nature_027",
+     "label": "Rock breaks 2",
+     "file": "sfx/nature/nature_027.ogg",
+     "dur": 0.86
+    },
+    {
+     "id": "nature_028",
+     "label": "Rock breaks 3",
+     "file": "sfx/nature/nature_028.ogg",
+     "dur": 0.46
+    },
+    {
+     "id": "nature_029",
+     "label": "Rockfall 1",
+     "file": "sfx/nature/nature_029.ogg",
+     "dur": 0.92
+    },
+    {
+     "id": "nature_030",
+     "label": "Rockfall 2",
+     "file": "sfx/nature/nature_030.ogg",
+     "dur": 0.51
+    },
+    {
+     "id": "nature_031",
+     "label": "Rockfall 3",
+     "file": "sfx/nature/nature_031.ogg",
+     "dur": 0.85
+    }
+   ]
+  }
+ ]
+}
