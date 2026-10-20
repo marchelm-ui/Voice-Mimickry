@@ -26,6 +26,8 @@ It also carries everything from Mocking Bird, the earlier kenku app, merged in:
 - **📜 Phrasebook** — ready-made kenku lines (combat, warnings, tavern, taunts…) via ＋ Add.
 - **Voice effects** — Cave echo, Distant (through a wall), Old memory (lo-fi) on any line.
 - **⚡ Quick lines** — pin a spoken line and replay it with one tap, even after a restart.
+- **Voice sharing** — Send packs a learned voice into one file; Receive imports it on another
+  phone, so the whole table shares NPCs the DM recorded once.
 - **Starter voices** — five ready-made voices (two real public-domain readers, three synthetic
   characters) so the app speaks well before you record anyone.
 

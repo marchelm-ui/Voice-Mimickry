@@ -29,7 +29,10 @@ class VoicesTab(private val a: MainActivity) {
             addView(ui.title("Voices"))
             addView(ui.body("Record a friend talking for a minute or two (ask first!). The more they say, the more " +
                 "words your kenku can repeat in their real voice."), ui.fill(14))
-            addView(ui.button("＋  New voice", Ui.Kind.PRIMARY) { newVoice() }, ui.fill(16))
+            val topRow = ui.row()
+            topRow.addView(ui.button("＋  New voice", Ui.Kind.PRIMARY) { newVoice() }, LinearLayout.LayoutParams(0, -2, 1f).apply { rightMargin = ui.dp(8) })
+            topRow.addView(ui.button("📥 Receive") { pickVoiceFile.launch("application/zip") }, ui.wrap(0))
+            addView(topRow, ui.fill(16))
             addView(list)
         })
     }
@@ -100,9 +103,47 @@ class VoicesTab(private val a: MainActivity) {
         addView(row, ui.fill(6))
         val row2 = ui.row()
         row2.addView(ui.button("📝 Check words") { review(v) }, ui.wrap())
+        row2.addView(ui.button("Send", Ui.Kind.QUIET) { send(v) }, ui.wrap())
         row2.addView(ui.button("Rename", Ui.Kind.QUIET) { rename(v) }, ui.wrap())
         row2.addView(ui.button("Delete", Ui.Kind.DANGER) { delete(v) }, ui.wrap())
         addView(row2)
+    }
+
+    /** Pack the voice into one file and hand it to another player (the whole table can share NPCs). */
+    private fun send(v: VoiceBank) {
+        a.setStatus("Packing ${v.name}…")
+        a.work({
+            val dir = java.io.File(a.cacheDir, "share").apply { mkdirs() }
+            val f = java.io.File(dir, v.name.replace(Regex("[^A-Za-z0-9 _-]"), "").ifBlank { "voice" } + ".kenku.zip")
+            a.engine.exportVoice(v, f)
+            f
+        }) { r ->
+            a.setStatus(null)
+            r.onSuccess { f ->
+                val uri = androidx.core.content.FileProvider.getUriForFile(a, "com.kenku.mimic.files", f)
+                a.startActivity(android.content.Intent.createChooser(android.content.Intent(android.content.Intent.ACTION_SEND).apply {
+                    type = "application/zip"
+                    putExtra(android.content.Intent.EXTRA_STREAM, uri)
+                    addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                }, "Send ${v.name}"))
+            }.onFailure { a.toast("Couldn't pack that voice: ${it.message}") }
+        }
+    }
+
+    private val pickVoiceFile = a.registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+        if (uri == null) return@registerForActivityResult
+        a.setStatus("Unpacking the voice…")
+        a.work({
+            a.contentResolver.openInputStream(uri)?.use { a.engine.importVoice(it) }
+                ?: throw IllegalArgumentException("Couldn't open that file.")
+        }) { r ->
+            a.setStatus(null)
+            r.onSuccess { v ->
+                a.prefs.edit().putBoolean("hasVoice", true).apply()
+                refresh(); a.toast("${v.name} has joined the kenku's repertoire.")
+                polish(v)
+            }.onFailure { a.toast("Couldn't import that: ${it.message}") }
+        }
     }
 
     private var testing = false

@@ -171,6 +171,17 @@ class Engine private constructor(private val ctx: Context) {
         return v
     }
 
+    /** Pack a learned voice into one file another phone can import. */
+    fun exportVoice(v: VoiceBank, out: File) = v.exportTo(out)
+
+    /** Bring in a voice packed by [exportVoice] on another phone. */
+    fun importVoice(zip: java.io.InputStream): VoiceBank {
+        val v = VoiceBank.importFrom(zip, File(voicesDir, "v" + System.currentTimeMillis()))
+        if (voices.any { it.name == v.name }) { v.name = v.name + " ②"; v.saveMeta() }
+        voices += v
+        return v
+    }
+
     fun deleteVoice(v: VoiceBank) {
         v.dir.deleteRecursively()
         voices.remove(v)

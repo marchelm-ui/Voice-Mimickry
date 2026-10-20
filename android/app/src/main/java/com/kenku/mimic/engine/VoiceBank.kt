@@ -161,6 +161,27 @@ class VoiceBank(val dir: File, var name: String) {
             return bank
         }
 
+        /** Unpack a voice packed by [exportTo] into [dir] and load it. */
+        fun importFrom(zip: java.io.InputStream, dir: File): VoiceBank {
+            dir.mkdirs()
+            try {
+                java.util.zip.ZipInputStream(zip).use { z ->
+                    while (true) {
+                        val e = z.nextEntry ?: break
+                        val name = File(e.name).name                 // flat names only: no path tricks
+                        if (e.isDirectory || name.isBlank() || name == "kenku-voice.txt") continue
+                        java.io.FileOutputStream(File(dir, name)).use { z.copyTo(it, 1 shl 20) }
+                    }
+                }
+                val v = load(dir)
+                if (v.recs.isEmpty()) throw IllegalArgumentException("That file holds no voice.")
+                return v
+            } catch (e: Throwable) {
+                dir.deleteRecursively()
+                throw e
+            }
+        }
+
         private fun readPcm(f: File): FloatArray {
             val b = ByteBuffer.wrap(f.readBytes()).order(ByteOrder.LITTLE_ENDIAN).asShortBuffer()
             return FloatArray(b.remaining()) { b.get(it) / 32768f }
@@ -172,6 +193,20 @@ class VoiceBank(val dir: File, var name: String) {
         File(dir, "voice.json").writeText(JSONObject().put("name", name)
             .put("f0", f0Median.toDouble()).put("loud", loudMedian)
             .put("recordings", JSONArray(recs.map { it.id })).toString())
+    }
+
+    /** Pack this voice into one file another phone can import: recordings, words, pool features. */
+    fun exportTo(out: File) {
+        java.util.zip.ZipOutputStream(java.io.FileOutputStream(out)).use { z ->
+            z.putNextEntry(java.util.zip.ZipEntry("kenku-voice.txt")); z.write(name.toByteArray()); z.closeEntry()
+            dir.listFiles()?.forEach { f ->
+                if (f.isFile) {
+                    z.putNextEntry(java.util.zip.ZipEntry(f.name))
+                    f.inputStream().use { it.copyTo(z, 1 shl 20) }
+                    z.closeEntry()
+                }
+            }
+        }
     }
 
     fun saveRecording(r: Recording) {

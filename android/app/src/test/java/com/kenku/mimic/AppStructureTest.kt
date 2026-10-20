@@ -78,6 +78,34 @@ class AppStructureTest {
         }
     }
 
+    @Test fun sharedVoicesSurviveTheRoundTrip() {
+        val sr = com.kenku.mimic.engine.Dsp.SR
+        val src = java.io.File(ctx.cacheDir, "voice-src").apply { deleteRecursively() }
+        val v = com.kenku.mimic.engine.VoiceBank(src, "Bram the Smith")
+        v.saveMeta()
+        val audio = FloatArray(sr) { i -> (0.2 * Math.sin(2 * Math.PI * 150 * i / sr)).toFloat() }
+        v.add(com.kenku.mimic.engine.Recording("r1", audio, "hello there", emptyList()))
+        v.saveRecording(v.recs.first())
+        java.io.File(src, "feat-r1.f16").writeBytes(ByteArray(2048))   // a one-frame pool cache
+        val packed = java.io.File(ctx.cacheDir, "voice.kenku.zip")
+        v.exportTo(packed)
+        val dst = java.io.File(ctx.cacheDir, "voice-dst").apply { deleteRecursively() }
+        val imported = packed.inputStream().use { com.kenku.mimic.engine.VoiceBank.importFrom(it, dst) }
+        assertEquals("Bram the Smith", imported.name)
+        assertEquals(1, imported.recs.size)
+        assertEquals("hello there", imported.recs.first().transcript)
+        assertEquals(audio.size, imported.recs.first().audio.size)
+        assertTrue("pool cache lost in transit", java.io.File(dst, "feat-r1.f16").length() == 2048L)
+        // and a malicious zip must not escape the voice folder
+        val evil = java.io.File(ctx.cacheDir, "evil.zip")
+        java.util.zip.ZipOutputStream(evil.outputStream()).use { z ->
+            z.putNextEntry(java.util.zip.ZipEntry("../../escape.txt")); z.write(1); z.closeEntry()
+        }
+        val dir3 = java.io.File(ctx.cacheDir, "voice-evil")
+        try { evil.inputStream().use { com.kenku.mimic.engine.VoiceBank.importFrom(it, dir3) } } catch (e: Throwable) { /* refusing is fine */ }
+        assertTrue("zip escaped its folder!", !java.io.File(ctx.cacheDir.parentFile, "escape.txt").exists() && !java.io.File(ctx.cacheDir, "escape.txt").exists())
+    }
+
     @Test fun phrasebookLinesAreSpeakable() {
         for ((section, phrases) in Phrasebook.sections) {
             assertTrue("$section is empty", phrases.isNotEmpty())
