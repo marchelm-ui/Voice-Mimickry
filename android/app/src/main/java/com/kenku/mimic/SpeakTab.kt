@@ -208,7 +208,7 @@ class SpeakTab(private val a: MainActivity) {
             val gap = FloatArray(com.kenku.mimic.engine.Dsp.SR * 3 / 20)      // 150 ms
             val pieces = ArrayList<FloatArray>()
             val words = ArrayList<Pair<String, Synth.Source>>()
-            var patched = 0
+            var seams = 0
             var spoke = false
             for (m in Regex("\\[([^\\]]+)\\]|[^\\[]+").findAll(text)) {
                 val tag = m.groups[1]?.value
@@ -230,7 +230,7 @@ class SpeakTab(private val a: MainActivity) {
                     if (pieces.isNotEmpty()) pieces += gap
                     pieces += au
                     words += rep.words
-                    patched += rep.patched
+                    seams += rep.seams
                     spoke = true
                 }
             }
@@ -240,7 +240,7 @@ class SpeakTab(private val a: MainActivity) {
             for (c in pieces) { System.arraycopy(c, 0, audio, p, c.size); p += c.size }
             val fx = LineEffect(fxKey)
             if (fx.active) audio = fx.process(audio) + fx.tail()   // the tail is the echo ringing on
-            audio to Synth.Report(if (spoke) words else com.kenku.mimic.engine.TextNorm.words(text).map { it to Synth.Source.NEURAL }, patched)
+            audio to Synth.Report(if (spoke) words else com.kenku.mimic.engine.TextNorm.words(text).map { it to Synth.Source.NEURAL }, seams)
         }) { r ->
             a.setStatus(null)
             r.onSuccess { (audio, rep) ->
