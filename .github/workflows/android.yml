@@ -90,6 +90,19 @@ jobs:
           ZA=$(ls -d $ANDROID_HOME/build-tools/*/ | sort -V | tail -1)zipalign
           $ZA -c -P 16 4 VoiceMimickry.apk && echo "16 KB page alignment OK"
 
+      - name: Installable on a Google Pixel 8a
+        run: |
+          set -euo pipefail
+          BT=$(ls -d $ANDROID_HOME/build-tools/*/ | sort -V | tail -1)
+          # the Pixel 8a runs Android 14+ (API 34+): the signature must verify there,
+          # the app must admit that API level, and it must carry 64-bit ARM code
+          ${BT}apksigner verify --min-sdk-version 34 --max-sdk-version 36 VoiceMimickry.apk
+          BADGING=$(${BT}aapt dump badging VoiceMimickry.apk)
+          echo "$BADGING" | grep -o "sdkVersion:'[0-9]*'" | grep -qE "sdkVersion:'([12][0-9]|3[0-4])'"
+          echo "$BADGING" | grep "native-code" | grep -q "arm64-v8a"
+          echo "$BADGING" | grep -o "versionCode='[0-9]*'"
+          echo "Installable on a Pixel 8a: signature, API level and ABI all check out"
+
       - name: Save logs to the build-logs branch if anything failed
         if: failure()
         run: |
