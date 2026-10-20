@@ -101,33 +101,64 @@ object AudioIO {
     class StreamPlayer {
         private val q = java.util.concurrent.LinkedBlockingQueue<FloatArray>()
         @Volatile private var cancelled = false
-        private val track = AudioTrack.Builder()
-            .setAudioAttributes(AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_MEDIA)
-                .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH).build())
-            .setAudioFormat(AudioFormat.Builder().setEncoding(AudioFormat.ENCODING_PCM_FLOAT)
-                .setSampleRate(Dsp.SR).setChannelMask(AudioFormat.CHANNEL_OUT_MONO).build())
-            .setTransferMode(AudioTrack.MODE_STREAM)
-            .setBufferSizeInBytes(Dsp.SR * 4)                     // 1 s of headroom
-            .build()
+        /** True when nothing could be played: the caller should play the finished line statically. */
+        @Volatile var failed = false; private set
+        private var useFloat = true
+
+        // some devices refuse a float stream or demand a bigger buffer than 1 s: honor the
+        // minimum, and walk down to 16-bit before giving up (a dead track used to fail silently)
+        private val track: AudioTrack? = run {
+            for (float in listOf(true, false)) {
+                val enc = if (float) AudioFormat.ENCODING_PCM_FLOAT else AudioFormat.ENCODING_PCM_16BIT
+                val min = AudioTrack.getMinBufferSize(Dsp.SR, AudioFormat.CHANNEL_OUT_MONO, enc)
+                if (min <= 0) continue
+                val t = try {
+                    AudioTrack.Builder()
+                        .setAudioAttributes(AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_MEDIA)
+                            .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH).build())
+                        .setAudioFormat(AudioFormat.Builder().setEncoding(enc)
+                            .setSampleRate(Dsp.SR).setChannelMask(AudioFormat.CHANNEL_OUT_MONO).build())
+                        .setTransferMode(AudioTrack.MODE_STREAM)
+                        .setBufferSizeInBytes(maxOf(min * 2, Dsp.SR * (if (float) 4 else 2)))
+                        .build()
+                } catch (e: Throwable) { null }
+                if (t != null && t.state == AudioTrack.STATE_INITIALIZED) { useFloat = float; return@run t }
+                t?.release()
+            }
+            failed = true
+            null
+        }
+
         private val writer = Thread {
+            val t = track ?: return@Thread
             try {
-                track.play()
+                t.play()
                 while (!cancelled) {
                     val c = q.take()
                     if (c.isEmpty()) break                         // the end marker
                     var off = 0
-                    while (off < c.size && !cancelled) {
-                        val n = track.write(c, off, c.size - off, AudioTrack.WRITE_BLOCKING)
-                        if (n <= 0) break
-                        off += n
+                    if (useFloat) {
+                        while (off < c.size && !cancelled) {
+                            val n = t.write(c, off, c.size - off, AudioTrack.WRITE_BLOCKING)
+                            if (n <= 0) { failed = true; break }
+                            off += n
+                        }
+                    } else {
+                        val sh = ShortArray(c.size) { i -> (c[i].coerceIn(-1f, 1f) * 32767).toInt().toShort() }
+                        while (off < sh.size && !cancelled) {
+                            val n = t.write(sh, off, sh.size - off, AudioTrack.WRITE_BLOCKING)
+                            if (n <= 0) { failed = true; break }
+                            off += n
+                        }
                     }
+                    if (failed) break
                 }
-                if (!cancelled) track.stop() else { track.pause(); track.flush() }
-            } catch (e: Throwable) { /* playback already torn down */ }
-            track.release()
-        }.apply { start() }
+                if (!cancelled && !failed) t.stop() else { t.pause(); t.flush() }
+            } catch (e: Throwable) { failed = true }
+            t.release()
+        }.apply { if (track != null) start() }
 
-        fun feed(x: FloatArray) { if (x.isNotEmpty() && !cancelled) q.put(x) }
+        fun feed(x: FloatArray) { if (x.isNotEmpty() && !cancelled && !failed) q.put(x) }
         fun finish() = q.put(FloatArray(0))
         fun cancel() { cancelled = true; q.clear(); q.put(FloatArray(0)) }
     }
@@ -143,22 +174,32 @@ object AudioIO {
     fun play(x: FloatArray, onDone: (() -> Unit)? = null) {
         stop()
         if (x.isEmpty()) { onDone?.invoke(); return }
-        val t = AudioTrack.Builder()
-            .setAudioAttributes(AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_MEDIA)
-                .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH).build())
-            .setAudioFormat(AudioFormat.Builder().setEncoding(AudioFormat.ENCODING_PCM_FLOAT)
-                .setSampleRate(Dsp.SR).setChannelMask(AudioFormat.CHANNEL_OUT_MONO).build())
-            .setTransferMode(AudioTrack.MODE_STATIC)
-            .setBufferSizeInBytes(x.size * 4)
-            .build()
-        t.write(x, 0, x.size, AudioTrack.WRITE_BLOCKING)
-        t.notificationMarkerPosition = x.size - 1
-        t.setPlaybackPositionUpdateListener(object : AudioTrack.OnPlaybackPositionUpdateListener {
-            override fun onMarkerReached(tr: AudioTrack?) { onDone?.invoke() }
-            override fun onPeriodicNotification(tr: AudioTrack?) {}
-        })
-        t.play()
-        track = t
+        for (float in listOf(true, false)) {
+            val enc = if (float) AudioFormat.ENCODING_PCM_FLOAT else AudioFormat.ENCODING_PCM_16BIT
+            val t = try {
+                AudioTrack.Builder()
+                    .setAudioAttributes(AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_MEDIA)
+                        .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH).build())
+                    .setAudioFormat(AudioFormat.Builder().setEncoding(enc)
+                        .setSampleRate(Dsp.SR).setChannelMask(AudioFormat.CHANNEL_OUT_MONO).build())
+                    .setTransferMode(AudioTrack.MODE_STATIC)
+                    .setBufferSizeInBytes(x.size * (if (float) 4 else 2))
+                    .build()
+            } catch (e: Throwable) { null } ?: continue
+            if (t.state != AudioTrack.STATE_INITIALIZED) { t.release(); continue }
+            val wrote = if (float) t.write(x, 0, x.size, AudioTrack.WRITE_BLOCKING)
+                else t.write(ShortArray(x.size) { i -> (x[i].coerceIn(-1f, 1f) * 32767).toInt().toShort() }, 0, x.size)
+            if (wrote <= 0) { t.release(); continue }
+            t.notificationMarkerPosition = x.size - 1
+            t.setPlaybackPositionUpdateListener(object : AudioTrack.OnPlaybackPositionUpdateListener {
+                override fun onMarkerReached(tr: AudioTrack?) { onDone?.invoke() }
+                override fun onPeriodicNotification(tr: AudioTrack?) {}
+            })
+            t.play()
+            track = t
+            return
+        }
+        onDone?.invoke()
     }
 
     @Synchronized

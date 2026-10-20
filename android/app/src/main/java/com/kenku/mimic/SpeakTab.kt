@@ -357,7 +357,10 @@ class SpeakTab(private val a: MainActivity) {
                 result.text = shown
                 val first = if (firstSound[0] > 0) (firstSound[0] - t0) / 1e9 else 0.0
                 val whole = (System.nanoTime() - t0) / 1e9
-                legend.text = "%s\n⏱ first sound %.1f s · whole line %.1f s".format(summary(rep), first, whole)
+                val rescued = player.failed
+                if (rescued) AudioIO.play(audio)     // the stream couldn't open: play the finished line whole
+                legend.text = "%s\n⏱ first sound %.1f s · whole line %.1f s%s"
+                    .format(summary(rep), first, whole, if (rescued) " · played after making (streaming unavailable)" else "")
                 lines.add(0, Line(text, v.name, audio, shown))
                 if (lines.size > 30) lines.removeAt(lines.size - 1)
                 oldLines.removeAll { it.text == text }
