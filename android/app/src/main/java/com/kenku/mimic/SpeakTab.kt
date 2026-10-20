@@ -1,7 +1,6 @@
 package com.kenku.mimic
 
 import android.content.Intent
-import android.graphics.Paint
 import android.text.SpannableStringBuilder
 import android.text.Spanned
 import android.text.style.ForegroundColorSpan
@@ -15,7 +14,9 @@ import android.widget.LinearLayout
 import android.widget.ScrollView
 import android.widget.TextView
 import androidx.core.content.FileProvider
+import com.kenku.mimic.engine.Dsp
 import com.kenku.mimic.engine.Synth
+import com.kenku.mimic.engine.TextNorm
 import com.kenku.mimic.engine.VoiceBank
 import java.io.File
 
@@ -239,7 +240,7 @@ class SpeakTab(private val a: MainActivity) {
         val rotateKey = rotate
         val player = AudioIO.openStream()                          // starts sounding at the first finished piece
         a.work({
-            val dspSr = com.kenku.mimic.engine.Dsp.SR
+            val dspSr = Dsp.SR
             // the voices that take turns when voice changes are on; the chosen voice leads
             val cast = if (rotateKey == "off") listOf(v)
                 else ([v] + a.engine.voices.filter { it !== v && it.recs.isNotEmpty() }).ifEmpty { listOf(v) }
@@ -260,9 +261,9 @@ class SpeakTab(private val a: MainActivity) {
             fun emitSpeech(raw: FloatArray, fluid: Boolean) {
                 if (raw.isEmpty()) return
                 // every voice levels to its own loudness; one line needs one level
-                val loud = com.kenku.mimic.engine.Dsp.loudness(raw)
+                val loud = Dsp.loudness(raw)
                 if (loudTarget == 0.0) loudTarget = loud
-                var y = if (loud < -60) raw else com.kenku.mimic.engine.Dsp.scale(raw, Math.min(4.0, Math.pow(10.0, (loudTarget - loud) / 20)))
+                var y = if (loud < -60) raw else Dsp.scale(raw, Math.min(4.0, Math.pow(10.0, (loudTarget - loud) / 20)))
                 y = clear.process(y)
                 SfxDsp.fadeEdges(y, 4)
                 val prev = held
@@ -283,7 +284,7 @@ class SpeakTab(private val a: MainActivity) {
                 if (y.size > xf) { push(fx.process(y.copyOfRange(0, y.size - xf))); held = y.copyOfRange(y.size - xf, y.size) }
                 else held = y
             }
-            fun speak(chunk: String, speaker: com.kenku.mimic.engine.VoiceBank): Pair<FloatArray, Synth.Report> =
+            fun speak(chunk: String, speaker: VoiceBank): Pair<FloatArray, Synth.Report> =
                 if (how == "mimic") a.engine.sayBest(speaker, chunk, opts) else a.engine.synth.speak(speaker, chunk, opts)
             for (m in Regex("\\[([^\\]]+)\\]|[^\\[]+").findAll(text)) {
                 val tag = m.groups[1]?.value
@@ -299,13 +300,13 @@ class SpeakTab(private val a: MainActivity) {
                     val part = m.value.trim()
                     if (part.isEmpty()) continue
                     val sentences = Regex("[^.!?…]+[.!?…]*").findAll(part).map { it.value.trim() }
-                        .filter { com.kenku.mimic.engine.TextNorm.words(it).isNotEmpty() }
+                        .filter { TextNorm.words(it).isNotEmpty() }
                     for (sent in sentences) {
                         // the rotation: whole sentences, or small word-groups spoken by turns
                         val groups = when (rotateKey) {
                             "w1", "w3" -> {
                                 val n = if (rotateKey == "w1") 1 else 3
-                                com.kenku.mimic.engine.TextNorm.words(sent).chunked(n).map { it.joinToString(" ") }
+                                TextNorm.words(sent).chunked(n).map { it.joinToString(" ") }
                             }
                             else -> listOf(sent)
                         }
@@ -327,8 +328,8 @@ class SpeakTab(private val a: MainActivity) {
             val tail = fx.tail()
             if (tail.isNotEmpty()) push(tail)
             player.finish()
-            val audio = com.kenku.mimic.engine.Dsp.concat(pieces)
-            audio to Synth.Report(if (spoke) words else com.kenku.mimic.engine.TextNorm.words(text).map { it to Synth.Source.NEURAL }, seams)
+            val audio = Dsp.concat(pieces)
+            audio to Synth.Report(if (spoke) words else TextNorm.words(text).map { it to Synth.Source.NEURAL }, seams)
         }) { r ->
             speaking = false
             a.setStatus(null)
